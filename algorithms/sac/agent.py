@@ -334,7 +334,7 @@ class SACAgent(Agent):
         self.pretrain()
 
         for self.i_episode in range(1, self.args.episode_num + 1):
-            is_relaunch = self.i_episode % self.args.save_period == 1
+            is_relaunch = self.i_episode % self.args.relaunch_period == 1
             state = self.env.reset(relaunch=is_relaunch, render=False, sampletrack=True)
             done = False
             score = 0
@@ -371,6 +371,7 @@ class SACAgent(Agent):
 
             if self.i_episode % self.args.save_period == 0:
                 self.save_params(self.i_episode)
+            if self.i_episode % self.args.test_period == 0:
                 self.interim_test()
 
         # termination

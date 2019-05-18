@@ -55,10 +55,14 @@ parser.add_argument(
 )
 parser.add_argument(
     "--wandb-project", type=str, default="", help="wandb project name")
+parser.add_argument(
+    "--relaunch-period", type=int, default=100, help="environment relaunch period")
+parser.add_argument(
+    "--test-period", type=int, default=100, help="test period")
 
 parser.set_defaults(test=False)
 parser.set_defaults(load_from=None)
-parser.set_defaults(render=False)
+parser.set_defaults(render=True)
 parser.set_defaults(log=False)
 args = parser.parse_args()
 
@@ -66,7 +70,7 @@ args = parser.parse_args()
 def main():
     """Main."""
     # env initialization
-    env = torcs.NoBrakeNoBackwardsEnv()
+    env = torcs.NoBackwardsEnv()
     # env_utils.set_env(env, args)
 
     # set a random seed
