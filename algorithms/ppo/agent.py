@@ -66,8 +66,8 @@ class PPOAgent(Agent):
         """
         Agent.__init__(self, env_single, args)
 
-        if not self.args.test:
-            self.env = env_multi
+        # if not self.args.test:
+        #     self.env = env_multi
         self.actor, self.critic = models
         self.actor_optimizer, self.critic_optimizer = optims
         self.epsilon = hyper_params["EPSILON"]

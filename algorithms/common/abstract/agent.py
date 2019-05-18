@@ -49,7 +49,7 @@ class Agent(ABC):
             self.is_discrete = False
 
         # for logging
-        self.env_name = str(self.env.env).split("<")[2].replace(">>", "")
+        self.env_name = 'Torcs' #str(self.env.env).split("<")[2].replace(">>", "")
         self.sha = (
             subprocess.check_output(["git", "rev-parse", "--short", "HEAD"])[:-1]
             .decode("ascii")
@@ -131,14 +131,14 @@ class Agent(ABC):
             test_num = self.args.episode_num
 
         for i_episode in range(test_num):
-            state = self.env.reset()
+            state = self.env.reset(relaunch=True, render=True, sampletrack=True)
             done = False
             score = 0
             step = 0
 
             while not done:
-                if self.args.render:
-                    self.env.render()
+                # if self.args.render:
+                #     self.env.render()
 
                 action = self.select_action(state)
                 next_state, reward, done = self.step(action)

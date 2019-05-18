@@ -100,7 +100,7 @@ class DDPGAgent(Agent):
             self.total_step < self.hyper_params["INITIAL_RANDOM_ACTION"]
             and not self.args.test
         ):
-            return self.env.action_space.sample()
+            return [np.random.random() * 2 - 1, np.random.random()]
 
         selected_action = self.actor(state).detach().cpu().numpy()
 
@@ -118,7 +118,7 @@ class DDPGAgent(Agent):
 
     def step(self, action: np.ndarray) -> Tuple[torch.Tensor, ...]:
         """Take an action and return the response of the env."""
-        next_state, reward, done, _ = self.env.step(action)
+        next_state, reward, done, _ = self.env.step(np.concatenate((action, [-1])))
 
         if not self.args.test:
             # if the last state is not a terminal state, store done as false
@@ -245,15 +245,15 @@ class DDPGAgent(Agent):
         self.pretrain()
 
         for self.i_episode in range(1, self.args.episode_num + 1):
-            state = self.env.reset()
+            state = self.env.reset(relaunch=self.i_episode == 0, render=False, sampletrack=True)
             done = False
             score = 0
             self.episode_step = 0
             losses = list()
 
             while not done:
-                if self.args.render and self.i_episode >= self.args.render_after:
-                    self.env.render()
+                # if self.args.render and self.i_episode >= self.args.render_after:
+                #     self.env.render()
 
                 action = self.select_action(state)
                 next_state, reward, done = self.step(action)
