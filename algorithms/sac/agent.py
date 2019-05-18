@@ -336,7 +336,10 @@ class SACAgent(Agent):
         self.pretrain()
 
         for self.i_episode in range(1, self.args.episode_num + 1):
-            state = self.env.reset(relaunch=self.i_episode % 100 == 1, sampletrack=True, render=False)
+            is_render = self.i_episode % 10 == 1 and self.args.render and self.i_episode >= self.args.render_after
+            is_relaunch = self.i_episode % 100 == 1 or is_render
+
+            state = self.env.reset(relaunch=is_relaunch, sampletrack=True, render=is_render)
             done = False
             score = 0
             self.episode_step = 0
