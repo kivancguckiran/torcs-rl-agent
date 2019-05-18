@@ -38,9 +38,9 @@ parser.add_argument(
 parser.add_argument(
     "--log", dest="log", action="store_true", help="turn on logging")
 parser.add_argument(
-    "--save-period", type=int, default=5, help="save model period")
+    "--save-period", type=int, default=50, help="save model period")
 parser.add_argument(
-    "--episode-num", type=int, default=1000, help="total episode num")
+    "--episode-num", type=int, default=5000, help="total episode num")
 parser.add_argument(
     "--max-episode-steps", type=int, default=1000, help="max episode step"
 )
