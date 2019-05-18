@@ -117,7 +117,7 @@ class SACAgent(Agent):
             self.total_step < self.hyper_params["INITIAL_RANDOM_ACTION"]
             and not self.args.test
         ):
-            return [np.random.random() * 2 - 1, np.random.random() * 2 - 1]
+            return self.env.action_space.sample()
 
         if self.args.test and not self.is_discrete:
             _, _, _, selected_action, _ = self.actor(state)

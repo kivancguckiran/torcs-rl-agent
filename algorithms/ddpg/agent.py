@@ -100,7 +100,7 @@ class DDPGAgent(Agent):
             self.total_step < self.hyper_params["INITIAL_RANDOM_ACTION"]
             and not self.args.test
         ):
-            return [np.random.random() * 2 - 1, np.random.random() * 2 - 1]
+            return self.env.action_space.sample()
 
         selected_action = self.actor(state).detach().cpu().numpy()
 

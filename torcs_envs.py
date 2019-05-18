@@ -1,4 +1,5 @@
 from gym_torcs import TorcsEnv
+from gym import spaces
 import numpy as np
 
 
@@ -15,7 +16,8 @@ class DefaultEnv(TorcsEnv):
 class NoBrakeEnv(DefaultEnv):
     def __init__(self, port=3101):
         super().__init__(port)
-        self.action_dim = 2
+        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,))
+        self.action_dim = self.action_space.shape[0]
 
     def step(self, u):
         env_u = u.copy()
