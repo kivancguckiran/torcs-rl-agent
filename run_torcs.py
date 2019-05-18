@@ -68,8 +68,6 @@ def main():
     # env initialization
     env = torcs.TempEnv()
     # env_utils.set_env(env, args)
-    state_dim = 29
-    action_dim = 2
 
     # set a random seed
     # common_utils.set_random_seed(args.seed, env)
@@ -77,7 +75,7 @@ def main():
     # run
     module_path = "examples.torcs." + args.algo
     example = importlib.import_module(module_path)
-    example.run(env, args, state_dim, action_dim)
+    example.run(env, args, env.state_dim, env.action_dim)
 
 
 if __name__ == "__main__":
