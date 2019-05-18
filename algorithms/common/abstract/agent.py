@@ -13,6 +13,7 @@ from typing import Tuple, Union
 
 import gym
 from gym.spaces import Discrete
+from gym_torcs import TorcsEnv
 import numpy as np
 import torch
 import wandb
@@ -32,7 +33,7 @@ class Agent(ABC):
 
     """
 
-    def __init__(self, env: gym.Env, args: argparse.Namespace):
+    def __init__(self, env: TorcsEnv, args: argparse.Namespace):
         """Initialization.
 
         Args:
@@ -131,7 +132,7 @@ class Agent(ABC):
             test_num = self.args.episode_num
 
         for i_episode in range(test_num):
-            state = self.env.reset(relaunch=True, render=True, sampletrack=True)
+            state = self.env.reset(relaunch=True, render=self.args.render, sampletrack=True)
             done = False
             score = 0
             step = 0
