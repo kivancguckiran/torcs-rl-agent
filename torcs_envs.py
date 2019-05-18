@@ -6,18 +6,20 @@ import numpy as np
 class DefaultEnv(TorcsEnv):
     def __init__(self, port=3101):
         super().__init__(port, '/usr/local/share/games/torcs/config/raceman/quickrace.xml')
-        self.state_dim = self.observation_space.shape[0]
-        self.action_dim = self.action_space.shape[0]
 
-    def step(self, u):
-        return super().step(u)
+    @property
+    def state_dim(self):
+        return self.observation_space.shape[0]
+
+    @property
+    def action_dim(self):
+        return self.action_space.shape[0]
 
 
 class NoBrakeEnv(DefaultEnv):
     def __init__(self, port=3101):
         super().__init__(port)
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,))
-        self.action_dim = self.action_space.shape[0]
 
     def step(self, u):
         env_u = u.copy()
