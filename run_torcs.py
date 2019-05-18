@@ -70,7 +70,7 @@ args = parser.parse_args()
 def main():
     """Main."""
     # env initialization
-    env = torcs.NoBackwardsEnv()
+    env = torcs.BitsPiecesEnv()
     # env_utils.set_env(env, args)
 
     # set a random seed
