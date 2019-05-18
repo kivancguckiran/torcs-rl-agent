@@ -32,7 +32,7 @@ parser.add_argument(
 parser.add_argument(
     "--render-after",
     type=int,
-    default=300,
+    default=0,
     help="start rendering after the input number of episode",
 )
 parser.add_argument(
@@ -58,7 +58,7 @@ parser.add_argument(
 
 parser.set_defaults(test=False)
 parser.set_defaults(load_from=None)
-parser.set_defaults(render=True)
+parser.set_defaults(render=False)
 parser.set_defaults(log=False)
 args = parser.parse_args()
 
