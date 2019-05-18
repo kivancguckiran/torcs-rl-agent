@@ -32,7 +32,7 @@ parser.add_argument(
 parser.add_argument(
     "--render-after",
     type=int,
-    default=0,
+    default=300,
     help="start rendering after the input number of episode",
 )
 parser.add_argument(
@@ -40,7 +40,7 @@ parser.add_argument(
 parser.add_argument(
     "--save-period", type=int, default=5, help="save model period")
 parser.add_argument(
-    "--episode-num", type=int, default=5000, help="total episode num")
+    "--episode-num", type=int, default=1000, help="total episode num")
 parser.add_argument(
     "--max-episode-steps", type=int, default=1000, help="max episode step"
 )
@@ -58,7 +58,7 @@ parser.add_argument(
 
 parser.set_defaults(test=False)
 parser.set_defaults(load_from=None)
-parser.set_defaults(render=False)
+parser.set_defaults(render=True)
 parser.set_defaults(log=False)
 args = parser.parse_args()
 
@@ -66,7 +66,7 @@ args = parser.parse_args()
 def main():
     """Main."""
     # env initialization
-    env = torcs.TempEnv()
+    env = torcs.NoBrakeEnv()
     # env_utils.set_env(env, args)
 
     # set a random seed
