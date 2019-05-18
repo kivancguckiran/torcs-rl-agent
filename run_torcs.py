@@ -66,7 +66,7 @@ args = parser.parse_args()
 def main():
     """Main."""
     # env initialization
-    env = torcs.HalfBrakeNoBackwardsEnv()
+    env = torcs.NoBrakeNoBackwardsEnv()
     # env_utils.set_env(env, args)
 
     # set a random seed

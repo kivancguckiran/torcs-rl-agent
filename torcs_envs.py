@@ -27,8 +27,12 @@ class NoBrakeNoBackwardsEnv(DefaultEnv):
         return super().step(np.concatenate((env_u, [-1])))
 
 class HalfBrakeNoBackwardsEnv(DefaultEnv):
+    def __init__(self, port=3101):
+        super().__init__(port)
+        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,))
+
     def step(self, u):
         env_u = u.copy()
         env_u[1] = (env_u[1] + 1) / 2
         env_u[2] = (env_u[2] - 1) / 2
-        return super().step(env_u)
+        return super().step(np.concatenate((env_u, [-1])))
