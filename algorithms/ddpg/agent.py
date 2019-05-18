@@ -247,7 +247,7 @@ class DDPGAgent(Agent):
         self.pretrain()
 
         for self.i_episode in range(1, self.args.episode_num + 1):
-            state = self.env.reset(relaunch=self.i_episode == 1, render=False, sampletrack=True)
+            state = self.env.reset(relaunch=self.i_episode % 100 == 1, render=False, sampletrack=True)
             done = False
             score = 0
             self.episode_step = 0
