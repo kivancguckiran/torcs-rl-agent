@@ -41,7 +41,7 @@ parser.add_argument(
     "--max-episode-steps", type=int, default=1000, help="max episode step"
 )
 parser.add_argument(
-    "--interim-test-num", type=int, default=10, help="interim test number"
+    "--interim-test-num", type=int, default=1, help="interim test number"
 )
 parser.add_argument(
     "--demo-path",
