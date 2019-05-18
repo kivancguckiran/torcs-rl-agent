@@ -8,7 +8,7 @@
 import argparse
 import importlib
 
-from gym_torcs import TorcsEnv
+import torcs_envs as torcs
 
 import algorithms.common.env.utils as env_utils
 import algorithms.common.helper_functions as common_utils
@@ -66,7 +66,7 @@ args = parser.parse_args()
 def main():
     """Main."""
     # env initialization
-    env = TorcsEnv(path='/usr/local/share/games/torcs/config/raceman/quickrace.xml')
+    env = torcs.TempEnv()
     # env_utils.set_env(env, args)
     state_dim = 29
     action_dim = 2

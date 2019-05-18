@@ -134,9 +134,7 @@ class SACAgent(Agent):
 
     def step(self, action: np.ndarray) -> Tuple[np.ndarray, np.float64, bool]:
         """Take an action and return the response of the env."""
-        env_action = action.copy()
-        env_action[1] = (env_action[1] + 1) / 2
-        next_state, reward, done, _ = self.env.step(np.concatenate((env_action, [-1])))
+        next_state, reward, done, _ = self.env.step(action)
 
         if not self.args.test:
             # if the last state is not a terminal state, store done as false
