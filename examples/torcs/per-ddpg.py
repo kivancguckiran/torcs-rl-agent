@@ -67,7 +67,6 @@ def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int)
     ).to(device)
     actor_target.load_state_dict(actor.state_dict())
 
-    print(state_dim + action_dim)
     # create critic
     critic = MLP(
         input_size=state_dim + action_dim,

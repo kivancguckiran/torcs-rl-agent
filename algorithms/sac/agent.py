@@ -117,7 +117,7 @@ class SACAgent(Agent):
             self.total_step < self.hyper_params["INITIAL_RANDOM_ACTION"]
             and not self.args.test
         ):
-            return self.env.action_space.sample()
+            return [np.random.random() * 2 - 1, np.random.random() * 2 - 1]
 
         if self.args.test and not self.is_discrete:
             _, _, _, selected_action, _ = self.actor(state)
@@ -134,7 +134,9 @@ class SACAgent(Agent):
 
     def step(self, action: np.ndarray) -> Tuple[np.ndarray, np.float64, bool]:
         """Take an action and return the response of the env."""
-        next_state, reward, done, _ = self.env.step(action)
+        env_action = action.copy()
+        env_action[1] = (env_action[1] + 1) / 2
+        next_state, reward, done, _ = self.env.step(np.concatenate((env_action, [-1])))
 
         if not self.args.test:
             # if the last state is not a terminal state, store done as false
@@ -334,15 +336,15 @@ class SACAgent(Agent):
         self.pretrain()
 
         for self.i_episode in range(1, self.args.episode_num + 1):
-            state = self.env.reset()
+            state = self.env.reset(relaunch=self.i_episode == 1, sampletrack=True, render=False)
             done = False
             score = 0
             self.episode_step = 0
             loss_episode = list()
 
             while not done:
-                if self.args.render and self.i_episode >= self.args.render_after:
-                    self.env.render()
+                # if self.args.render and self.i_episode >= self.args.render_after:
+                #     self.env.render()
 
                 action = self.select_action(state)
                 next_state, reward, done = self.step(action)

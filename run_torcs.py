@@ -36,9 +36,9 @@ parser.add_argument(
 )
 parser.add_argument("--log", dest="log", action="store_true", help="turn on logging")
 parser.add_argument("--save-period", type=int, default=100, help="save model period")
-parser.add_argument("--episode-num", type=int, default=1500, help="total episode num")
+parser.add_argument("--episode-num", type=int, default=5000, help="total episode num")
 parser.add_argument(
-    "--max-episode-steps", type=int, default=300, help="max episode step"
+    "--max-episode-steps", type=int, default=1000, help="max episode step"
 )
 parser.add_argument(
     "--interim-test-num", type=int, default=10, help="interim test number"
@@ -46,14 +46,14 @@ parser.add_argument(
 parser.add_argument(
     "--demo-path",
     type=str,
-    default="data/lunarlander_continuous_demo.pkl",
+    default="data/torcs_continuous_demo.pkl",
     help="demonstration path",
 )
 parser.add_argument("--wandb-project", type=str, default="", help="wandb project name")
 
 parser.set_defaults(test=False)
 parser.set_defaults(load_from=None)
-parser.set_defaults(render=True)
+parser.set_defaults(render=False)
 parser.set_defaults(log=False)
 args = parser.parse_args()
 
@@ -63,7 +63,7 @@ def main():
     # env initialization
     env = TorcsEnv(path='/usr/local/share/games/torcs/config/raceman/quickrace.xml')
     # env_utils.set_env(env, args)
-    state_dim = env.observation_space.shape[0]
+    state_dim = 29
     action_dim = 2
 
     # set a random seed
