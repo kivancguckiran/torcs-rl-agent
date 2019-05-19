@@ -61,6 +61,9 @@ parser.add_argument(
     "--test-period", type=int, default=100, help="test period")
 parser.add_argument(
     "--num-stack", type=int, default=1, help="number of states to stack")
+parser.add_argument(
+    "--reward-type", type=str, default="no_trackpos", help="reward type"
+)
 
 parser.set_defaults(test=False)
 parser.set_defaults(load_from=None)
@@ -71,7 +74,7 @@ args = parser.parse_args()
 
 def main():
     """Main."""
-    env = torcs.BitsPiecesContEnv(nstack=args.num_stack)
+    env = torcs.BitsPiecesContEnv(nstack=args.num_stack, reward_type=args.reward_type)
 
     # set a random seed
     # common_utils.set_random_seed(args.seed, env)
