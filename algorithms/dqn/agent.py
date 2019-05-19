@@ -309,6 +309,7 @@ class DQNAgent(Agent):
         # logger
         if self.args.log:
             with open(self.log_filename, "w") as file:
+                file.write(str(self.args) + "\n")
                 file.write(str(self.hyper_params) + "\n")
 
         # pre-training if needed
@@ -331,9 +332,6 @@ class DQNAgent(Agent):
             t_begin = time.time()
 
             while not done:
-                # if self.args.render and self.i_episode >= self.args.render_after:
-                #     self.env.render()
-
                 action = self.select_action(state)
                 next_state, reward, done = self.step(action)
                 self.total_step += 1

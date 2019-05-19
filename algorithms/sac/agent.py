@@ -332,6 +332,7 @@ class SACAgent(Agent):
         # logger
         if self.args.log:
             with open(self.log_filename, "w") as file:
+                file.write(str(self.args) + "\n")
                 file.write(str(self.hyper_params) + "\n")
 
         # pre-training if needed
