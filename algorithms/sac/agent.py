@@ -342,9 +342,6 @@ class SACAgent(Agent):
             loss_episode = list()
 
             while not done:
-                # if self.args.render and self.i_episode >= self.args.render_after:
-                #     self.env.render()
-
                 action = self.select_action(state)
                 next_state, reward, done = self.step(action)
                 self.total_step += 1

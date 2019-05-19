@@ -59,6 +59,8 @@ parser.add_argument(
     "--relaunch-period", type=int, default=50, help="environment relaunch period")
 parser.add_argument(
     "--test-period", type=int, default=100, help="test period")
+parser.add_argument(
+    "--num-stack", type=int, default=1, help="number of states to stack")
 
 parser.set_defaults(test=False)
 parser.set_defaults(load_from=None)
@@ -69,9 +71,7 @@ args = parser.parse_args()
 
 def main():
     """Main."""
-    # env initialization
-    env = torcs.BitsPiecesContEnv()
-    # env_utils.set_env(env, args)
+    env = torcs.BitsPiecesContEnv(nstack=args.num_stack)
 
     # set a random seed
     # common_utils.set_random_seed(args.seed, env)
