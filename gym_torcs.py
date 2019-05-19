@@ -47,9 +47,10 @@ class TorcsEnv:
 
     initial_reset = True
 
-    def __init__(self, port=3101, path=None):
+    def __init__(self, port=3101, path=None, reward_type='original'):
         self.port = port
         self.initial_run = True
+        self.reward_type = reward_type
         # self.reset_torcs()
         
         if path:
@@ -131,9 +132,13 @@ class TorcsEnv:
         track = np.array(obs['track'])
         sp = np.array(obs['speedX'])/200
         progress = sp * np.cos(obs['angle'])
-        #reward = progress - sp*np.sin(obs["angle"]) - sp * np.abs(obs['trackPos'])/5
-        # reward = progress - np.abs(sp * np.sin(obs["angle"])) - sp * np.abs(obs['trackPos'])
-        reward = progress - np.abs(sp * np.sin(obs["angle"]))
+
+        if self.reward_type == 'original':
+            reward = progress - np.abs(sp * np.sin(obs["angle"])) - sp * np.abs(obs['trackPos']) / 5
+        elif self.reward_type == 'no_trackpos':
+            reward = progress - np.abs(sp * np.sin(obs["angle"]))
+        elif self.reward_type == 'custom_trackpos':
+            reward = progress - np.abs(sp * np.sin(obs["angle"])) - sp * (obs['trackPos'] ** 2) / 5
 
         # collision detection
         if obs['damage'] - obs_pre['damage'] > 0:
