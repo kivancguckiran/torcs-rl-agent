@@ -245,7 +245,7 @@ class SACAgent(Agent):
             print("[ERROR] the input path does not exist. ->", path)
             return
 
-        params = torch.load(path)
+        params = torch.load(path, map_location=device)
         self.actor.load_state_dict(params["actor"])
         self.qf_1.load_state_dict(params["qf_1"])
         self.qf_2.load_state_dict(params["qf_2"])
