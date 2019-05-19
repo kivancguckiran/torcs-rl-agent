@@ -142,7 +142,7 @@ class Agent(ABC):
                 #     self.env.render()
 
                 action = self.select_action(state)
-                print(action)
+                # print(action)
                 next_state, reward, done = self.step(action)
 
                 state = next_state
