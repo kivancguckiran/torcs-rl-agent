@@ -18,6 +18,8 @@ class DefaultEnv(TorcsEnv):
 
     @property
     def action_dim(self):
+        if isinstance(self.action_space, spaces.Discrete):
+            return self.action_space.n
         return self.action_space.shape[0]
 
 class NoBrakeNoBackwardsEnv(DefaultEnv):
@@ -59,6 +61,25 @@ class BitsPiecesEnv(DefaultEnv):
         else:
             env_u[ACCELERATE] = 0
             env_u[BRAKE] = 1
+
+        return super().step(env_u)
+
+class BitsPiecesContEnv(DefaultEnv):
+    def __init__(self, port=3101):
+        super().__init__(port)
+        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,))
+
+    def step(self, u):
+        env_u = np.zeros(3)
+
+        env_u[STEER] = u[0]
+
+        if u[1] > 0:
+            env_u[ACCELERATE] = u[1]
+            env_u[BRAKE] = -1
+        else:
+            env_u[ACCELERATE] = 0
+            env_u[BRAKE] = u[1]
 
         return super().step(env_u)
 
