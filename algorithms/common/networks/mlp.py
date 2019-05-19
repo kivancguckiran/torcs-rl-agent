@@ -39,6 +39,13 @@ def init_layer_uniform(layer: nn.Linear, init_w: float = 3e-3) -> nn.Linear:
     return layer
 
 
+def init_layer_xavier(layer: nn.Linear, init_w: float = 3e-3) -> nn.Linear:
+    nn.init.xavier_uniform_(layer.weight)
+    nn.init.zeros_(layer.bias)
+
+    return layer
+
+
 class MLP(nn.Module):
     """Baseline of Multilayer perceptron.
 
@@ -64,7 +71,7 @@ class MLP(nn.Module):
         linear_layer: nn.Module = nn.Linear,
         use_output_layer: bool = True,
         n_category: int = -1,
-        init_fn: Callable = init_layer_uniform,
+        init_fn: Callable = init_layer_xavier,
     ):
         """Initialization.
 
@@ -147,7 +154,7 @@ class GaussianDist(MLP):
         mu_activation: Callable = torch.tanh,
         log_std_min: float = -20,
         log_std_max: float = 2,
-        init_fn: Callable = init_layer_uniform,
+        init_fn: Callable = init_layer_xavier,
     ):
         """Initialization."""
         super(GaussianDist, self).__init__(
@@ -237,7 +244,7 @@ class CategoricalDist(MLP):
         output_size: int,
         hidden_sizes: list,
         hidden_activation: Callable = F.relu,
-        init_fn: Callable = init_layer_uniform,
+        init_fn: Callable = init_layer_xavier,
     ):
         """Initialization."""
         super(CategoricalDist, self).__init__(
