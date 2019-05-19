@@ -250,7 +250,7 @@ class DQNAgent(Agent):
             print("[ERROR] the input path does not exist. ->", path)
             return
 
-        params = torch.load(path)
+        params = torch.load(path, map_location=device)
         self.dqn.load_state_dict(params["dqn_state_dict"])
         self.dqn_target.load_state_dict(params["dqn_target_state_dict"])
         self.dqn_optimizer.load_state_dict(params["dqn_optim_state_dict"])

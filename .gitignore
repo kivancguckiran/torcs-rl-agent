@@ -3,4 +3,5 @@ wandb*
 save
 .idea
 .mypy_cache
+.DS_Store
 MUJOCO_LOG.TXT

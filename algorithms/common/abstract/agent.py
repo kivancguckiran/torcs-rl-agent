@@ -138,11 +138,7 @@ class Agent(ABC):
             step = 0
 
             while not done:
-                # if self.args.render:
-                #     self.env.render()
-
                 action = self.select_action(state)
-                # print(action)
                 next_state, reward, done = self.step(action)
 
                 state = next_state
