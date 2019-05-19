@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Run module for SAC on LunarLanderContinuous-v2.
+"""Run module for SAC on TORCS
 
 - Author: Curt Park
 - Contact: curt.park@medipixel.io

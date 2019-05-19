@@ -288,6 +288,7 @@ class Client():
                % (self.maxSteps,self.port)))
         self.so.close()
         self.so = None
+        self.setup_connection()
         #sys.exit() # No need for this really.
 
 class ServerState():

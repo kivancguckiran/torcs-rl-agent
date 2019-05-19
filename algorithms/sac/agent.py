@@ -247,15 +247,10 @@ class SACAgent(Agent):
 
         params = torch.load(path)
         self.actor.load_state_dict(params["actor"])
-        self.actor.eval()
         self.qf_1.load_state_dict(params["qf_1"])
-        self.qf_1.eval()
         self.qf_2.load_state_dict(params["qf_2"])
-        self.qf_2.eval()
         self.vf.load_state_dict(params["vf"])
-        self.vf.eval()
         self.vf_target.load_state_dict(params["vf_target"])
-        self.vf_target.eval()
         self.actor_optimizer.load_state_dict(params["actor_optim"])
         self.qf_1_optimizer.load_state_dict(params["qf_1_optim"])
         self.qf_2_optimizer.load_state_dict(params["qf_2_optim"])
@@ -339,7 +334,7 @@ class SACAgent(Agent):
         self.pretrain()
 
         for self.i_episode in range(1, self.args.episode_num + 1):
-            is_relaunch = self.i_episode % self.args.save_period == 1
+            is_relaunch = self.i_episode % self.args.relaunch_period == 1
             state = self.env.reset(relaunch=is_relaunch, render=False, sampletrack=True)
             done = False
             score = 0
@@ -376,6 +371,7 @@ class SACAgent(Agent):
 
             if self.i_episode % self.args.save_period == 0:
                 self.save_params(self.i_episode)
+            if self.i_episode % self.args.test_period == 0:
                 self.interim_test()
 
         # termination

@@ -317,7 +317,8 @@ class DQNAgent(Agent):
         )
 
         for self.i_episode in range(1, self.args.episode_num + 1):
-            state = self.env.reset()
+            is_relaunch = self.i_episode % self.args.relaunch_period == 1
+            state = self.env.reset(relaunch=is_relaunch, render=False, sampletrack=True)
             self.episode_step = 0
             losses = list()
             done = False
@@ -326,8 +327,8 @@ class DQNAgent(Agent):
             t_begin = time.time()
 
             while not done:
-                if self.args.render and self.i_episode >= self.args.render_after:
-                    self.env.render()
+                # if self.args.render and self.i_episode >= self.args.render_after:
+                #     self.env.render()
 
                 action = self.select_action(state)
                 next_state, reward, done = self.step(action)
@@ -358,6 +359,7 @@ class DQNAgent(Agent):
 
             if self.i_episode % self.args.save_period == 0:
                 self.save_params(self.i_episode)
+            if self.i_episode % self.args.test_period == 0:
                 self.interim_test()
 
         # termination
