@@ -50,9 +50,9 @@ def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int)
         action_dim (int): dimension of actions
 
     """
-    hidden_sizes_actor = [256, 256]
-    hidden_sizes_vf = [256, 256]
-    hidden_sizes_qf = [256, 256]
+    hidden_sizes_actor = [512, 256, 128]
+    hidden_sizes_vf = [512, 256, 128]
+    hidden_sizes_qf = [512, 256, 128]
 
     # target entropy
     target_entropy = -np.prod((action_dim,)).item()  # heuristic
