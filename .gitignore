@@ -1,6 +1,8 @@
 __pycache__
 wandb*
 save
+logs
 .idea
 .mypy_cache
+.DS_Store
 MUJOCO_LOG.TXT

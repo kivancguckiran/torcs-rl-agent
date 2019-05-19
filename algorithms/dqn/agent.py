@@ -250,7 +250,7 @@ class DQNAgent(Agent):
             print("[ERROR] the input path does not exist. ->", path)
             return
 
-        params = torch.load(path)
+        params = torch.load(path, map_location=device)
         self.dqn.load_state_dict(params["dqn_state_dict"])
         self.dqn_target.load_state_dict(params["dqn_target_state_dict"])
         self.dqn_optimizer.load_state_dict(params["dqn_optim_state_dict"])
@@ -284,15 +284,20 @@ class DQNAgent(Agent):
         )
 
         if self.args.log:
-            wandb.log(
-                {
-                    "score": score,
-                    "epsilon": self.epsilon,
-                    "dqn loss": loss[0],
-                    "avg q values": loss[1],
-                    "time per each step": avg_time_cost,
-                }
-            )
+            with open(self.log_filename, "a") as file:
+                file.write(
+                    "%d;%d;%d;%f;%f;%f;%f;%.6f\n"
+                    % (
+                        i,
+                        self.episode_step,
+                        self.total_step,
+                        score,
+                        self.epsilon,
+                        loss[0],
+                        loss[1],
+                        avg_time_cost,
+                    )
+                )
 
     # pylint: disable=no-self-use, unnecessary-pass
     def pretrain(self):
@@ -303,9 +308,8 @@ class DQNAgent(Agent):
         """Train the agent."""
         # logger
         if self.args.log:
-            wandb.init(project=self.args.wandb_project)
-            wandb.config.update(self.hyper_params)
-            # wandb.watch([self.dqn], log="parameters")
+            with open(self.log_filename, "w") as file:
+                file.write(str(self.hyper_params) + "\n")
 
         # pre-training if needed
         self.pretrain()

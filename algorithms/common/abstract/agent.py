@@ -50,12 +50,14 @@ class Agent(ABC):
             self.is_discrete = False
 
         # for logging
-        self.env_name = 'Torcs' #str(self.env.env).split("<")[2].replace(">>", "")
+        self.env_name = 'Torcs'
         self.sha = (
             subprocess.check_output(["git", "rev-parse", "--short", "HEAD"])[:-1]
             .decode("ascii")
             .strip()
         )
+
+        self.log_filename = self._init_log_file()
 
     @abstractmethod
     def select_action(self, state: np.ndarray) -> Union[torch.Tensor, np.ndarray]:
@@ -90,6 +92,14 @@ class Agent(ABC):
     @abstractmethod
     def write_log(self, *args):
         pass
+
+    def _init_log_file(self):
+        if not os.path.exists("./logs"):
+            os.mkdir("./logs")
+
+        logs_name = self.env_name + "_" + self.args.algo + "_" + self.sha
+
+        return os.path.join("./logs/" + logs_name + ".txt")
 
     @abstractmethod
     def train(self):
@@ -138,11 +148,7 @@ class Agent(ABC):
             step = 0
 
             while not done:
-                # if self.args.render:
-                #     self.env.render()
-
                 action = self.select_action(state)
-                # print(action)
                 next_state, reward, done = self.step(action)
 
                 state = next_state
