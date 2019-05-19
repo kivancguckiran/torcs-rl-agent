@@ -79,7 +79,7 @@ class BitsPiecesContEnv(DefaultEnv):
             env_u[BRAKE] = -1
         else:
             env_u[ACCELERATE] = 0
-            env_u[BRAKE] = abs(u[1])
+            env_u[BRAKE] = (abs(u[1]) * 2) - 1
 
         return super().step(env_u)
 
