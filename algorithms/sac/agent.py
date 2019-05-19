@@ -305,17 +305,22 @@ class SACAgent(Agent):
         )
 
         if self.args.log:
-            wandb.log(
-                {
-                    "score": score,
-                    "total loss": total_loss,
-                    "actor loss": loss[0] * policy_update_freq,
-                    "qf_1 loss": loss[1],
-                    "qf_2 loss": loss[2],
-                    "vf loss": loss[3],
-                    "alpha loss": loss[4],
-                }
-            )
+            with open(self.log_filename, "a") as file:
+                file.write(
+                    "%d;%d;%d;%d;%.3f;%.3f;%.3f;%.3f;%.3f;%.3f\n"
+                    % (
+                        i,
+                        self.episode_step,
+                        self.total_step,
+                        score,
+                        total_loss,
+                        loss[0] * policy_update_freq,  # actor loss
+                        loss[1],  # qf_1 loss
+                        loss[2],  # qf_2 loss
+                        loss[3],  # vf loss
+                        loss[4],  # alpha loss
+                    )
+                )
 
     # pylint: disable=no-self-use, unnecessary-pass
     def pretrain(self):
@@ -326,9 +331,8 @@ class SACAgent(Agent):
         """Train the agent."""
         # logger
         if self.args.log:
-            wandb.init(project=self.args.wandb_project)
-            wandb.config.update(self.hyper_params)
-            # wandb.watch([self.actor, self.vf, self.qf_1, self.qf_2], log="parameters")
+            with open(self.log_filename, "w") as file:
+                file.write(str(self.hyper_params) + "\n")
 
         # pre-training if needed
         self.pretrain()
