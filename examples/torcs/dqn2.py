@@ -28,7 +28,7 @@ hyper_params = {
     "W_N_STEP": 1.0,
     "W_Q_REG": 1e-7,
     "BUFFER_SIZE": int(1e5),
-    "BATCH_SIZE": 64,
+    "BATCH_SIZE": 32,
     "LR_DQN": 1e-4,  # dueling: 6.25e-5
     "ADAM_EPS": 1e-8,  # rainbow: 1.5e-4
     "WEIGHT_DECAY": 1e-7,
@@ -65,7 +65,7 @@ def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int)
     """
     # create model
     def get_fc_model():
-        hidden_sizes = [256, 128]
+        hidden_sizes = [128, 128, 64]
 
         if hyper_params["USE_NOISY_NET"]:
             # use noisy net
