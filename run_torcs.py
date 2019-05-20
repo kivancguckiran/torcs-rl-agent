@@ -34,7 +34,7 @@ parser.add_argument(
 parser.add_argument(
     "--interim-test-num", type=int, default=1, help="interim test number")
 parser.add_argument(
-    "--relaunch-period", type=int, default=5, help="environment relaunch period")
+    "--relaunch-period", type=int, default=1, help="environment relaunch period")
 parser.add_argument(
     "--test-period", type=int, default=100, help="test period")
 parser.add_argument(

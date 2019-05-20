@@ -173,7 +173,7 @@ class Client():
                     # print("relaunch torcs")
                     os.system('pkill torcs')
                     time.sleep(1.0)
-                    print('restarting custom')
+                    print('restarting')
                     if self.vision is False:
                         os.system('torcs -nofuel -nodamage -nolaptime &')
                     else:
@@ -242,7 +242,8 @@ class Client():
                 sockdata = sockdata.decode('utf-8')
             except socket.error as emsg:
                 # pass
-                self.setup_connection()
+                print('socket error...')
+                self.shutdown()
                 return
                 # print('.', end=' ')
                 #print "Waiting for data on %d.............." % self.port
@@ -284,8 +285,7 @@ class Client():
 
     def shutdown(self):
         if not self.so: return
-        print(("Race terminated or %d steps elapsed. Shutting down %d."
-               % (self.maxSteps,self.port)))
+        print("Race terminated. Shutting down %d." % self.S.d['racePos'])
         self.so.close()
         self.so = None
         self.setup_connection()
