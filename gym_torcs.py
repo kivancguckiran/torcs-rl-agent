@@ -51,6 +51,7 @@ class TorcsEnv:
         self.port = port
         self.initial_run = True
         self.reward_type = reward_type
+        self.reset_counter = 0
         # self.reset_torcs()
         
         if path:
@@ -193,7 +194,8 @@ class TorcsEnv:
         if relaunch:
             if sampletrack:
                 try:
-                    sample_track(self.root)
+                    sample_track(self.root, self.reset_counter)
+                    self.reset_counter += 1
                 except AttributeError:
                     pass
             try:
