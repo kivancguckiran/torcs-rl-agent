@@ -52,7 +52,7 @@ class TorcsEnv:
         self.initial_run = True
         self.reward_type = reward_type
         self.reset_counter = 0
-        # self.reset_torcs()
+        self.reset_torcs()
         
         if path:
             self.tree = ET.parse(path)
@@ -210,9 +210,9 @@ class TorcsEnv:
             self.client.respond_to_server()
 
             ## TENTATIVE. Restarting TORCS every episode suffers the memory leak bug!
-            # if relaunch is True:
-            #     self.reset_torcs()
-            #     # print("### TORCS is RELAUNCHED ###")
+            if relaunch is True:
+                self.reset_torcs()
+                # print("### TORCS is RELAUNCHED ###")
 
         # Modify here if you use multiple tracks in the environment
         self.client = snakeoil3.Client(p=self.port, vision=False)  # Open new UDP in vtorcs

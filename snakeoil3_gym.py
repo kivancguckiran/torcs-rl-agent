@@ -137,10 +137,9 @@ class Client():
         if d: self.debug= d
         self.S= ServerState()
         self.R= DriverAction()
-        self.launch()
         self.setup_connection()
 
-    def launch(self):
+    def relaunch(self):
         os.system('pkill torcs')
         time.sleep(1.0)
         if self.vision is False:
