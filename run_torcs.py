@@ -52,6 +52,7 @@ args = parser.parse_args()
 def main():
     if args.algo.startswith("dqn"):
         env = torcs.DiscretizedEnv(nstack=args.num_stack, reward_type=args.reward_type, action_count=21)
+        # env = torcs.DiscretizedOldEnv(nstack=args.num_stack, reward_type=args.reward_type)
     else:
         env = torcs.BitsPiecesContEnv(nstack=args.num_stack, reward_type=args.reward_type)
 
