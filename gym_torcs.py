@@ -142,6 +142,8 @@ class TorcsEnv:
             reward = progress - np.abs(sp * np.sin(obs["angle"])) - sp * (obs['trackPos'] ** 2) / 5
         elif self.reward_type == 'trackpos':
             reward = progress - np.abs(sp * np.sin(obs["angle"])) - sp * np.abs(obs['trackPos'])
+        elif self.reward_type == 'no_penalty':
+            reward = progress
 
         # collision detection
         if obs['damage'] - obs_pre['damage'] > 0:
