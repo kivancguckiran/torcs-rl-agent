@@ -28,7 +28,7 @@ hyper_params = {
     "W_N_STEP": 1.0,
     "W_Q_REG": 1e-7,
     "BUFFER_SIZE": int(1e5),
-    "BATCH_SIZE": 64,
+    "BATCH_SIZE": 32,
     "LR_DQN": 1e-4,  # dueling: 6.25e-5
     "ADAM_EPS": 1e-8,  # rainbow: 1.5e-4
     "WEIGHT_DECAY": 1e-7,
