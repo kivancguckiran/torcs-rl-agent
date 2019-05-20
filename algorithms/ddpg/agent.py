@@ -219,14 +219,19 @@ class DDPGAgent(Agent):
         )
 
         if self.args.log:
-            wandb.log(
-                {
-                    "score": score,
-                    "total loss": total_loss,
-                    "actor loss": loss[0],
-                    "critic loss": loss[1],
-                }
-            )
+            with open(self.log_filename, "a") as file:
+                file.write(
+                    "%d;%d;%d;%d;%f;%.3f;%.3f\n"
+                    % (
+                        i,
+                        self.episode_step,
+                        self.total_step,
+                        score,
+                        total_loss,
+                        loss[0],
+                        loss[1],
+                    )  # actor loss  # critic loss
+                )
 
     # pylint: disable=no-self-use, unnecessary-pass
     def pretrain(self):
@@ -237,9 +242,9 @@ class DDPGAgent(Agent):
         """Train the agent."""
         # logger
         if self.args.log:
-            wandb.init(project=self.args.wandb_project)
-            wandb.config.update(self.hyper_params)
-            # wandb.watch([self.actor, self.critic], log="parameters")
+            with open(self.log_filename, "w") as file:
+                file.write(str(self.args) + "\n")
+                file.write(str(self.hyper_params) + "\n")
 
         # pre-training if needed
         self.pretrain()

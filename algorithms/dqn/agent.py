@@ -22,7 +22,6 @@ import gym
 import numpy as np
 import torch
 from torch.nn.utils import clip_grad_norm_
-import wandb
 
 from algorithms.common.abstract.agent import Agent
 from algorithms.common.buffer.priortized_replay_buffer import PrioritizedReplayBuffer

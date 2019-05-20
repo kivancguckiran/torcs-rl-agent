@@ -10,8 +10,6 @@ import importlib
 
 import torcs_envs as torcs
 
-import algorithms.common.env.utils as env_utils
-import algorithms.common.helper_functions as common_utils
 
 # configurations
 parser = argparse.ArgumentParser(description="Pytorch RL algorithms")
@@ -26,8 +24,6 @@ parser.add_argument(
 parser.add_argument(
     "--on-render", dest="render", action="store_true", help="turn on rendering")
 parser.add_argument(
-    "--render-after", type=int, default=0, help="start rendering after the input number of episode")
-parser.add_argument(
     "--log", dest="log", action="store_true", help="turn on logging")
 parser.add_argument(
     "--save-period", type=int, default=50, help="save model period")
@@ -37,10 +33,6 @@ parser.add_argument(
     "--max-episode-steps", type=int, default=10000, help="max episode step")
 parser.add_argument(
     "--interim-test-num", type=int, default=1, help="interim test number")
-parser.add_argument(
-    "--demo-path", type=str, default="data/torcs_continuous_demo.pkl", help="demonstration path")
-parser.add_argument(
-    "--wandb-project", type=str, default="", help="wandb project name")
 parser.add_argument(
     "--relaunch-period", type=int, default=5, help="environment relaunch period")
 parser.add_argument(
@@ -59,7 +51,7 @@ args = parser.parse_args()
 
 def main():
     if args.algo.startswith("dqn"):
-        env = torcs.DiscretizedEnv(nstack=args.num_stack, reward_type=args.reward_type)
+        env = torcs.DiscretizedEnv(nstack=args.num_stack, reward_type=args.reward_type, action_count=27)
     else:
         env = torcs.BitsPiecesContEnv(nstack=args.num_stack, reward_type=args.reward_type)
 
