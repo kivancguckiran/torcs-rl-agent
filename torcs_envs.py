@@ -110,8 +110,7 @@ class DiscretizedEnv(DefaultEnv):
     def __init__(self, port=3101, nstack=1, reward_type='no_trackpos', action_count=9):
         super().__init__(port, nstack, reward_type)
 
-        if action_count % 9 != 0:
-            raise 'Action count must be product of 9!'
+        assert action_count % 9 == 0
 
         self.action_space = spaces.Discrete(action_count)
 
