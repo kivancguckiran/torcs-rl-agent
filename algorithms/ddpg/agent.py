@@ -250,7 +250,7 @@ class DDPGAgent(Agent):
         self.pretrain()
 
         for self.i_episode in range(1, self.args.episode_num + 1):
-            is_relaunch = self.i_episode % self.args.save_period == 1
+            is_relaunch = (self.i_episode - 1) % self.args.relaunch_period == 0
             state = self.env.reset(relaunch=is_relaunch, render=False, sampletrack=True)
             done = False
             score = 0

@@ -11,7 +11,7 @@ BRAKE = 2
 
 class DefaultEnv(TorcsEnv):
     def __init__(self, port=3101, nstack=1, reward_type='no_trackpos'):
-        super().__init__(port, '/usr/local/share/games/torcs/config/raceman/quickrace.xml', reward_type)
+        super().__init__(port, path='/usr/local/share/games/torcs/config/raceman/quickrace.xml', reward_type=reward_type)
         self.nstack = nstack
         self.stack_buffer = deque(maxlen=nstack)
 
