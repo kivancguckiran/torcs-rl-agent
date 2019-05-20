@@ -52,7 +52,7 @@ class TorcsEnv:
         self.initial_run = True
         self.reward_type = reward_type
         self.reset_counter = 0
-        # self.reset_torcs()
+        self.reset_torcs()
         
         if path:
             self.tree = ET.parse(path)
