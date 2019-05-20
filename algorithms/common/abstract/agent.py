@@ -159,5 +159,5 @@ class Agent(ABC):
                 "[INFO] test %d\tstep: %d\ttotal score: %d" % (i_episode, step, score)
             )
 
-            if self.args.log:
-                wandb.log({"test score": score})
+            # if self.args.log:
+            #     wandb.log({"test score": score})
