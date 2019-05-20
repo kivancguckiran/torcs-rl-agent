@@ -107,57 +107,23 @@ class BitsPiecesContEnv(DefaultEnv):
 
 
 class DiscretizedEnv(DefaultEnv):
-    def __init__(self, port=3101, nstack=1, reward_type='no_trackpos'):
+    def __init__(self, port=3101, nstack=1, reward_type='no_trackpos', action_count=9):
         super().__init__(port, nstack, reward_type)
-        self.action_space = spaces.Discrete(9)
+
+        if action_count % 9 != 0:
+            raise 'Action count must be product of 9!'
+
+        self.action_space = spaces.Discrete(action_count)
+
+        self.accelerate_actions = np.tile([1, 0, 0], action_count // 3)
+        self.brake_actions = np.tile([-1, -1, 1], action_count // 3)
+        self.steer_actions = np.repeat(np.linspace(-1, 1, action_count // 3), 3).flatten()
 
     def step(self, u):
         env_u = np.zeros(3)
 
-        if u == 0:
-            # steer = 1, throttle = 1, brake = -1
-            env_u[STEER] = 1
-            env_u[ACCELERATE] = 1
-            env_u[BRAKE] = -1
-        elif u == 1:
-            # steer = 0, throttle = 1, brake = -1
-            env_u[STEER] = 0
-            env_u[ACCELERATE] = 1
-            env_u[BRAKE] = -1
-        elif u == 2:
-            # steer = -1, throttle = 1, brake = -1
-            env_u[STEER] = -1
-            env_u[ACCELERATE] = 1
-            env_u[BRAKE] = -1
-        elif u == 3:
-            # steer = 1, throttle = 0, brake = -1
-            env_u[STEER] = 1
-            env_u[ACCELERATE] = 0
-            env_u[BRAKE] = -1
-        elif u == 4:
-            # steer = 0, throttle = 0, brake = -1
-            env_u[STEER] = 0
-            env_u[ACCELERATE] = 0
-            env_u[BRAKE] = -1
-        elif u == 5:
-            # steer = -1, throttle = 0, brake = -1
-            env_u[STEER] = -1
-            env_u[ACCELERATE] = 0
-            env_u[BRAKE] = -1
-        elif u == 6:
-            # steer = 1, throttle = 0, brake = 1
-            env_u[STEER] = 1
-            env_u[ACCELERATE] = 0
-            env_u[BRAKE] = 1
-        elif u == 7:
-            # steer = 0, throttle = 0, brake = 1
-            env_u[STEER] = 0
-            env_u[ACCELERATE] = 0
-            env_u[BRAKE] = 1
-        elif u == 8:
-            # steer = -1, throttle = 0, brake = 1
-            env_u[STEER] = -1
-            env_u[ACCELERATE] = 0
-            env_u[BRAKE] = 1
+        env_u[ACCELERATE] = self.accelerate_actions[u]
+        env_u[STEER] = self.steer_actions[u]
+        env_u[BRAKE] = self.brake_actions[u]
 
         return super().step(env_u)
