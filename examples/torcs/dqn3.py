@@ -82,7 +82,7 @@ def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int)
             init_fn = init_layer_uniform
 
         if hyper_params["USE_LSTM"]:
-            model = plain.C51DuelingMLP(
+            model = lstm.C51DuelingMLP(
                 input_size=state_dim,
                 action_size=action_dim,
                 hidden_sizes=hidden_sizes,
@@ -93,7 +93,7 @@ def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int)
                 init_fn=init_fn
             ).to(device)
         else:
-            model = lstm.C51DuelingMLP(
+            model = plain.C51DuelingMLP(
                 input_size=state_dim,
                 action_size=action_dim,
                 hidden_sizes=hidden_sizes,

@@ -42,7 +42,7 @@ class TorcsEnv:
         reset: send a message to reset the game.
 
     """
-    terminal_judge_start = 50  # Speed limit is applied after this step
+    terminal_judge_start = 1000  # Speed limit is applied after this step
     termination_limit_progress = 5/200  # [km/h], episode terminates if car is running slower than this limit
 
     initial_reset = True
@@ -159,6 +159,14 @@ class TorcsEnv:
             sintheta = np.abs(np.sin(obs['angle']))
             costheta = np.cos(obs['angle'])
             reward = Vx * costheta - Vx * sintheta - Vx * trackpos * sintheta - Vy * costheta
+        elif self.reward_type == 'extra_github':
+            speedX = obs['speedX'] / 200
+            speedY = obs['speedY'] / 200
+            reward = speedX * np.cos(obs['angle']) \
+                        - np.abs(1.0 * obs['speedX'] * np.sin(obs['angle'])) \
+                        - 2 * speedX * np.abs(obs['trackPos'] * np.sin(obs['angle'])) \
+                        - speedY * np.cos(obs['angle'])
+
         elif self.reward_type == 'race_pos':
             reward = progress - np.abs(sp * np.sin(obs["angle"]))  # no trackpos
             if obs['racePos'] > obs_pre['racePos']:
@@ -166,66 +174,34 @@ class TorcsEnv:
             elif obs['racePos'] < obs_pre['racePos']:
                 reward -= 1
 
-        if self.reward_type != 'extra_github':
-            # collision detection
-            if obs['damage'] - obs_pre['damage'] > 0:
-                info["collision"] = True
-                reward = -1
+        # collision detection
+        if obs['damage'] - obs_pre['damage'] > 0:
+            info["collision"] = True
+            reward = -1
 
-            if self.terminal_judge_start < self.time_step: # Episode terminates if the progress of agent is small
-                if abs(progress) < self.termination_limit_progress:
-                    if self.time_step >  20 :
-                            reward -= 10
-                            # print("--- No progress restart : reward: {},x:{},angle:{},trackPos:{}".format(reward,sp,obs['angle'],obs['trackPos']))
-                            # print(self.time_step)
-                            episode_terminate = True
-                            info["no progress"] = True
-                            # client.R.d['meta'] = True
-
-            if np.cos(obs['angle']) < 0:  # Episode is terminated if the agent runs backward
-                if self.time_step >  20 :
+        if self.terminal_judge_start < self.time_step: # Episode terminates if the progress of agent is small
+            if abs(progress) < self.termination_limit_progress:
                     reward -= 10
-                    # print("--- backward restart : reward: {},x:{},angle:{},trackPos:{}".format( reward, sp, obs['angle'], obs['trackPos']))
+                    # print("--- No progress restart : reward: {},x:{},angle:{},trackPos:{}".format(reward,sp,obs['angle'],obs['trackPos']))
                     # print(self.time_step)
                     episode_terminate = True
-                    info["moving back"] = True
+                    info["no progress"] = True
                     # client.R.d['meta'] = True
 
-            info["place"] = int(obs["racePos"])
-            if episode_terminate is True: # Send a reset signal
-                reward += (obs["racePos"] == 1)*20 # If terminated and first place
-                self.initial_run = False
-                # client.respond_to_server()
-        else: # 'extra_github':
-            track = np.array(obs['track'])
-            trackPos = np.array(obs['trackPos'])
-            sp = np.array(obs['speedX'])
-            spy = np.array(obs['speedY'])
-
-            progress = sp*np.cos(1.0*obs['angle']) - np.abs(1.0*sp*np.sin(obs['angle']))\
-                        - 2 * sp*np.abs(obs['trackPos']*np.sin(obs['angle']))\
-                        -spy*np.cos(obs['angle'])
-            reward = progress
-
-            # collision detection
-            if obs['damage'] - obs_pre['damage'] > 0:
-                reward = -200
-
-            # Termination judgement #########################
-            episode_terminate = False
-            if (abs(track.any()) > 1 or abs(trackPos) > 1):  # Episode is terminated if the car is out of track
-                reward = -50
-                if np.random.rand() < 0.1:
-                    episode_terminate = True
-
-            if self.terminal_judge_start < self.time_step: # Episode terminates if the progress of agent is small
-                if progress < self.termination_limit_progress:
-                    print("No progress")
-                    episode_terminate = True
-
-            if np.cos(obs['angle']) < 0: # Episode is terminated if the agent runs backward
+        if np.cos(obs['angle']) < 0:  # Episode is terminated if the agent runs backward
+            if self.time_step > 20 :
+                reward -= 10
+                # print("--- backward restart : reward: {},x:{},angle:{},trackPos:{}".format( reward, sp, obs['angle'], obs['trackPos']))
+                # print(self.time_step)
                 episode_terminate = True
+                info["moving back"] = True
+                # client.R.d['meta'] = True
 
+        info["place"] = int(obs["racePos"])
+        if episode_terminate is True: # Send a reset signal
+            reward += (obs["racePos"] == 1)*20 # If terminated and first place
+            self.initial_run = False
+            # client.respond_to_server()
 
         self.time_step += 1
 

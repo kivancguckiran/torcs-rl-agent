@@ -336,6 +336,7 @@ class DQNAgent(Agent):
         for self.i_episode in range(1, self.args.episode_num + 1):
             is_relaunch = (self.i_episode - 1) % self.args.relaunch_period == 0
             state = self.env.reset(relaunch=is_relaunch, render=False, sampletrack=True)
+
             self.episode_step = 0
             losses = list()
             done = False
