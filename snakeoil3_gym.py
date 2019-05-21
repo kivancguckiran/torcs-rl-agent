@@ -288,7 +288,7 @@ class Client():
 
     def shutdown(self):
         if not self.so: return
-        print("Race terminated. Shutting down %d." % self.S.d['racePos'])
+        print("Race terminated. Shutting down.")
         self.so.close()
         self.so = None
         self.setup_connection()
