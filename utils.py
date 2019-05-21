@@ -52,6 +52,8 @@ def sample_track(root_node, counter):
     trackname_node.attrib["val"] = trackname
     tracktype_node.attrib["val"] = tracktype
 
+    return trackname, tracktype
+
 def set_render_mode(root_node, render=True):
     node = _find_by_name(root_node, "Quick Race")
     subnode = _find_by_name(node, "display mode")

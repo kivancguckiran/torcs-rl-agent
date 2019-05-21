@@ -280,16 +280,18 @@ class SACAgent(Agent):
 
         Agent.save_params(self, params, n_episode)
 
-    def write_log(
-        self, i: int, loss: np.ndarray, score: float = 0.0, policy_update_freq: int = 1
-    ):
+    def write_log(self, i: int, loss: np.ndarray, score: float = 0.0, policy_update_freq: int = 1, speed: list = None):
         """Write log about loss and score"""
         total_loss = loss.sum()
+
+        max_speed = 0 if speed is None else (max(speed))
+        avg_speed = 0 if speed is None else (sum(speed) / len(speed))
 
         print(
             "[INFO] episode %d, episode_step %d, total step %d, total score: %d\n"
             "total loss: %.3f actor_loss: %.3f qf_1_loss: %.3f qf_2_loss: %.3f "
             "vf_loss: %.3f alpha_loss: %.3f\n"
+            "track name: %s, race position: %d, max speed %.2f, avg speed %.2f\n"
             % (
                 i,
                 self.episode_step,
@@ -301,13 +303,17 @@ class SACAgent(Agent):
                 loss[2],  # qf_2 loss
                 loss[3],  # vf loss
                 loss[4],  # alpha loss
+                self.env.track_name,
+                self.env.last_obs['racePos'],
+                max_speed,
+                avg_speed
             )
         )
 
         if self.args.log:
             with open(self.log_filename, "a") as file:
                 file.write(
-                    "%d;%d;%d;%d;%.3f;%.3f;%.3f;%.3f;%.3f;%.3f\n"
+                    "%d;%d;%d;%d;%.3f;%.3f;%.3f;%.3f;%.3f;%.3f;%s;%d;%.2f;%.2f\n"
                     % (
                         i,
                         self.episode_step,
@@ -319,6 +325,10 @@ class SACAgent(Agent):
                         loss[2],  # qf_2 loss
                         loss[3],  # vf loss
                         loss[4],  # alpha loss
+                        self.env.track_name,
+                        self.env.last_obs['racePos'],
+                        max_speed,
+                        avg_speed
                     )
                 )
 
@@ -345,6 +355,7 @@ class SACAgent(Agent):
             score = 0
             self.episode_step = 0
             loss_episode = list()
+            speed = list()
 
             while not done:
                 action = self.select_action(state)
@@ -354,6 +365,8 @@ class SACAgent(Agent):
 
                 state = next_state
                 score += reward
+
+                speed.append(self.env.last_speed)
 
                 # training
                 if len(self.memory) >= self.hyper_params["BATCH_SIZE"]:
@@ -369,6 +382,7 @@ class SACAgent(Agent):
                     avg_loss,
                     score,
                     self.hyper_params["POLICY_UPDATE_FREQ"],
+                    speed
                 )
 
             if self.i_episode % self.args.save_period == 0:

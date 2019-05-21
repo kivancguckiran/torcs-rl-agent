@@ -146,6 +146,7 @@ class Agent(ABC):
             done = False
             score = 0
             step = 0
+            speed = list()
 
             while not done:
                 action = self.select_action(state)
@@ -155,8 +156,23 @@ class Agent(ABC):
                 score += reward
                 step += 1
 
+                speed.append(self.env.last_speed)
+
+            max_speed = 0 if speed is None else (max(speed))
+            avg_speed = 0 if speed is None else (sum(speed) / len(speed))
+
             print(
-                "[INFO] test %d\tstep: %d\ttotal score: %d" % (i_episode, step, score)
+                "[INFO] test %d\tstep: %d\ttotal score: %d\n" 
+                "track name: %s\trace position: %d\tmax speed %.2f\tavg speed %.2f\n"
+                % (
+                    i_episode,
+                    step,
+                    score,
+                    self.env.track_name,
+                    self.env.last_obs['racePos'],
+                    max_speed,
+                    avg_speed
+                )
             )
 
             # if self.args.log:

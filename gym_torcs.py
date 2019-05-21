@@ -122,8 +122,9 @@ class TorcsEnv:
 
         # Get the current full-observation from torcs
         obs = client.S.d
-        
+
         self.last_obs = copy.deepcopy(obs)
+        self.last_speed = np.sqrt(obs['speedX']**2 + obs['speedY']**2)
 
 
         # Make an obsevation from a raw observation vector from TORCS
@@ -205,7 +206,7 @@ class TorcsEnv:
         if relaunch:
             if sampletrack:
                 try:
-                    sample_track(self.root, self.reset_counter)
+                    self.track_name, _ = sample_track(self.root, self.reset_counter)
                     self.reset_counter += 1
                 except AttributeError:
                     pass
