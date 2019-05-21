@@ -152,7 +152,7 @@ class TorcsEnv:
             reward = sp - np.abs(sp * np.sin(obs["angle"]))
         elif self.reward_type == 'endtoend': # https://team.inria.fr/rits/files/2018/02/ICRA18_EndToEndDriving_CameraReady.pdf
             reward = sp * (np.cos(obs['angle']) - np.abs(obs['trackPos']))
-        elif self.reward_Type == 'extra': # https://github.com/bhanuvikasr/Deep-RL-TORCS/blob/master/report.pdf
+        elif self.reward_type == 'extra': # https://github.com/bhanuvikasr/Deep-RL-TORCS/blob/master/report.pdf
             Vx = obs['speedX']
             Vy = obs['speedY']
             trackpos = np.abs(obs['trackPos'])
