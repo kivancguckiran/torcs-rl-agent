@@ -50,16 +50,16 @@ args = parser.parse_args()
 
 
 def main():
-    if args.algo.startswith("dqn") or args.algo == "sac-discrete":
+    if args.algo == "dqn":
+        env = torcs.DiscretizedOldEnv(nstack=args.num_stack, reward_type=args.reward_type)
+    elif args.algo == "dqn2" or args.algo == "sac-discrete":
+        env = torcs.DiscretizedEnv(nstack=args.num_stack, reward_type=args.reward_type,
+                                   action_count=21)
+    elif args.algo.startswith("dqn"):
         env = torcs.DiscretizedInriaEnv(nstack=args.num_stack, reward_type=args.reward_type,
                                         epsilon_brake=0.1)  # -1 to disable
-        # env = torcs.DiscretizedEnv(nstack=args.num_stack, reward_type=args.reward_type, action_count=21)
-        # env = torcs.DiscretizedOldEnv(nstack=args.num_stack, reward_type=args.reward_type)
     else:
         env = torcs.BitsPiecesContEnv(nstack=args.num_stack, reward_type=args.reward_type)
-
-    # set a random seed
-    # common_utils.set_random_seed(args.seed, env)
 
     # run
     module_path = "examples.torcs." + args.algo
