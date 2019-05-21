@@ -344,7 +344,7 @@ class DQNAgent(Agent):
 
             t_begin = time.time()
 
-            if self.hyper_params["USE_LSTM"]:
+            if "USE_LSTM" in self.hyper_params and self.hyper_params["USE_LSTM"]:
                 self.dqn.reset_lstm_state()
                 self.dqn_target.reset_lstm_state()
 
