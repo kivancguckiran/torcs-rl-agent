@@ -162,8 +162,8 @@ class TorcsEnv:
         elif self.reward_type == 'extra_github':
             speedX = obs['speedX'] / 200
             speedY = obs['speedY'] / 200
-            reward = speedX * np.cos(obs['angle']) \
-                        - np.abs(1.0 * obs['speedX'] * np.sin(obs['angle'])) \
+            reward = speedX * np.cos(1.0 * obs['angle']) \
+                        - np.abs(1.0 * speedX * np.sin(obs['angle'])) \
                         - 2 * speedX * np.abs(obs['trackPos'] * np.sin(obs['angle'])) \
                         - speedY * np.cos(obs['angle'])
 
