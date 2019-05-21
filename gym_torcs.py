@@ -144,6 +144,17 @@ class TorcsEnv:
             reward = progress - np.abs(sp * np.sin(obs["angle"])) - sp * np.abs(obs['trackPos'])
         elif self.reward_type == 'no_penalty':
             reward = progress
+        elif self.reward_type == 'speed':
+            reward = sp - np.abs(sp * np.sin(obs["angle"]))
+        elif self.reward_type == 'endtoend': # https://team.inria.fr/rits/files/2018/02/ICRA18_EndToEndDriving_CameraReady.pdf
+            reward = sp * (np.cos(obs['angle']) - np.abs(obs['trackPos']))
+        elif self.reward_Type == 'extra': # https://github.com/bhanuvikasr/Deep-RL-TORCS/blob/master/report.pdf
+            Vx = obs['speedX']
+            Vy = obs['speedY']
+            trackpos = np.abs(obs['trackPos'])
+            sintheta = np.abs(np.sin(obs['angle']))
+            costheta = np.cos(obs['angle'])
+            reward = Vx * costheta - Vx * sintheta - Vx * trackpos * sintheta - Vy * costheta
 
         # collision detection
         if obs['damage'] - obs_pre['damage'] > 0:
