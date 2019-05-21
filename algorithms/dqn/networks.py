@@ -87,15 +87,7 @@ class C51CNN(CNN):
         self.fc_layers.reset_noise()
 
 
-class LSTMStateHandler:
-    """Includes methods to handle LSTM states."""
-
-    def reset_lstm_state(self):
-        self.hx = torch.zeros(1, self.lstm.input_size).to(device)
-        self.cx = torch.zeros(1, self.lstm.input_size).to(device)
-
-
-class C51DuelingMLP(MLP, NoisyMLPHandler, LSTMStateHandler):
+class C51DuelingMLP(MLP, NoisyMLPHandler):
     """Multilayered perceptron for C51 with dueling construction."""
 
     def __init__(
@@ -109,7 +101,6 @@ class C51DuelingMLP(MLP, NoisyMLPHandler, LSTMStateHandler):
         hidden_activation: Callable = F.relu,
         linear_layer: nn.Module = nn.Linear,
         init_fn: Callable = init_layer_xavier,
-        use_lstm: bool = False
     ):
         """Initialization."""
         super(C51DuelingMLP, self).__init__(
@@ -126,15 +117,7 @@ class C51DuelingMLP(MLP, NoisyMLPHandler, LSTMStateHandler):
         self.output_size = action_size * atom_size
         self.v_min, self.v_max = v_min, v_max
 
-        self.use_lstm = use_lstm
-        if self.use_lstm:
-            self.lstm = nn.LSTMCell(in_size, in_size)
-            self.lstm.bias_ih.data.fill_(0)
-            self.lstm.bias_hh.data.fill_(0)
-            self.hx, self.cx = None, None
-            self.reset_lstm_state()
-
-            # set advantage layer
+        # set advantage layer
         self.advantage_hidden_layer = self.linear_layer(in_size, in_size)
         self.advantage_layer = self.linear_layer(in_size, self.output_size)
         self.advantage_layer = init_fn(self.advantage_layer)
@@ -144,22 +127,11 @@ class C51DuelingMLP(MLP, NoisyMLPHandler, LSTMStateHandler):
         self.value_layer = self.linear_layer(in_size, self.atom_size)
         self.value_layer = init_fn(self.value_layer)
 
-    # def reset_lstm_state(self):
-    #     if self.use_lstm:
-    #         self.hx = torch.zeros(1, self.lstm.input_size).to(device)
-    #         self.cx = torch.zeros(1, self.lstm.input_size).to(device)
-
     def forward_(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         """Get distribution for atoms."""
         action_size, atom_size = self.action_size, self.atom_size
 
         x = super(C51DuelingMLP, self).forward(x)
-
-        if self.use_lstm:
-            x = x.view(1, self.lstm.input_size)
-            self.hx, self.cx = self.lstm(x, (self.hx, self.cx))
-            x = self.hx
-
         adv_x = self.hidden_activation(self.advantage_hidden_layer(x))
         val_x = self.hidden_activation(self.value_hidden_layer(x))
 
@@ -180,73 +152,6 @@ class C51DuelingMLP(MLP, NoisyMLPHandler, LSTMStateHandler):
         _, q = self.forward_(x)
 
         return q
-
-
-# class C51DuelingMLP(MLP, NoisyMLPHandler):
-#     """Multilayered perceptron for C51 with dueling construction."""
-#
-#     def __init__(
-#         self,
-#         input_size: int,
-#         action_size: int,
-#         hidden_sizes: list,
-#         atom_size: int = 51,
-#         v_min: int = -10,
-#         v_max: int = 10,
-#         hidden_activation: Callable = F.relu,
-#         linear_layer: nn.Module = nn.Linear,
-#         init_fn: Callable = init_layer_xavier,
-#     ):
-#         """Initialization."""
-#         super(C51DuelingMLP, self).__init__(
-#             input_size=input_size,
-#             output_size=action_size,
-#             hidden_sizes=hidden_sizes,
-#             hidden_activation=hidden_activation,
-#             linear_layer=linear_layer,
-#             use_output_layer=False,
-#         )
-#         in_size = hidden_sizes[-1]
-#         self.action_size = action_size
-#         self.atom_size = atom_size
-#         self.output_size = action_size * atom_size
-#         self.v_min, self.v_max = v_min, v_max
-#
-#         # set advantage layer
-#         self.advantage_hidden_layer = self.linear_layer(in_size, in_size)
-#         self.advantage_layer = self.linear_layer(in_size, self.output_size)
-#         self.advantage_layer = init_fn(self.advantage_layer)
-#
-#         # set value layer
-#         self.value_hidden_layer = self.linear_layer(in_size, in_size)
-#         self.value_layer = self.linear_layer(in_size, self.atom_size)
-#         self.value_layer = init_fn(self.value_layer)
-#
-#     def forward_(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
-#         """Get distribution for atoms."""
-#         action_size, atom_size = self.action_size, self.atom_size
-#
-#         x = super(C51DuelingMLP, self).forward(x)
-#         adv_x = self.hidden_activation(self.advantage_hidden_layer(x))
-#         val_x = self.hidden_activation(self.value_hidden_layer(x))
-#
-#         advantage = self.advantage_layer(adv_x).view(-1, action_size, atom_size)
-#         value = self.value_layer(val_x).view(-1, 1, atom_size)
-#         advantage_mean = advantage.mean(dim=1, keepdim=True)
-#
-#         q_atoms = value + advantage - advantage_mean
-#         dist = F.softmax(q_atoms, dim=2)
-#
-#         support = torch.linspace(self.v_min, self.v_max, self.atom_size).to(device)
-#         q = torch.sum(dist * support, dim=2)
-#
-#         return dist, q
-#
-#     def forward(self, x: torch.Tensor) -> torch.Tensor:
-#         """Forward method implementation."""
-#         _, q = self.forward_(x)
-#
-#         return q
 
 
 class IQNCNN(CNN):
