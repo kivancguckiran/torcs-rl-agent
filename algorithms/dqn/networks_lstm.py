@@ -14,7 +14,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from algorithms.common.networks.cnn import CNN
-from algorithms.common.networks.mlp import MLP, init_layer_uniform, init_layer_xavier
+from algorithms.common.networks.mlp_lstm import MLP, init_layer_uniform, init_layer_xavier
 from algorithms.dqn.linear import NoisyMLPHandler
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")

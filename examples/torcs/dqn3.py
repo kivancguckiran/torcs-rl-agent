@@ -16,7 +16,9 @@ from algorithms.common.helper_functions import identity
 from algorithms.common.networks.mlp import init_layer_uniform
 from algorithms.dqn.agent import DQNAgent
 from algorithms.dqn.linear import NoisyLinearConstructor
-from algorithms.dqn.networks import C51DuelingMLP
+
+import algorithms.dqn.networks as plain
+import algorithms.dqn.networks_lstm as lstm
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -51,7 +53,7 @@ hyper_params = {
     "USE_NOISY_NET": True,
     "STD_INIT": 0.5,
     # Temporal
-    "USE_LSTM": True
+    "USE_LSTM": False
 }
 
 
@@ -79,17 +81,28 @@ def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int)
             linear_layer = nn.Linear
             init_fn = init_layer_uniform
 
-        model = C51DuelingMLP(
-            input_size=state_dim,
-            action_size=action_dim,
-            hidden_sizes=hidden_sizes,
-            v_min=hyper_params["V_MIN"],
-            v_max=hyper_params["V_MAX"],
-            atom_size=hyper_params["ATOMS"],
-            linear_layer=linear_layer,
-            init_fn=init_fn,
-            use_lstm=hyper_params["USE_LSTM"]
-        ).to(device)
+        if hyper_params["USE_LSTM"]:
+            model = plain.C51DuelingMLP(
+                input_size=state_dim,
+                action_size=action_dim,
+                hidden_sizes=hidden_sizes,
+                v_min=hyper_params["V_MIN"],
+                v_max=hyper_params["V_MAX"],
+                atom_size=hyper_params["ATOMS"],
+                linear_layer=linear_layer,
+                init_fn=init_fn
+            ).to(device)
+        else:
+            model = lstm.C51DuelingMLP(
+                input_size=state_dim,
+                action_size=action_dim,
+                hidden_sizes=hidden_sizes,
+                v_min=hyper_params["V_MIN"],
+                v_max=hyper_params["V_MAX"],
+                atom_size=hyper_params["ATOMS"],
+                linear_layer=linear_layer,
+                init_fn=init_fn
+            ).to(device)
 
         return model
 
