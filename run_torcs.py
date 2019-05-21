@@ -40,7 +40,7 @@ parser.add_argument(
 parser.add_argument(
     "--num-stack", type=int, default=1, help="number of states to stack")
 parser.add_argument(
-    "--reward-type", type=str, default="no_trackpos", help="reward type")
+    "--reward-type", type=str, default="extra", help="reward type")
 
 parser.set_defaults(test=False)
 parser.set_defaults(load_from=None)
@@ -57,7 +57,7 @@ def main():
                                    action_count=21)
     elif args.algo.startswith("dqn"):
         env = torcs.DiscretizedInriaEnv(nstack=args.num_stack, reward_type=args.reward_type,
-                                        epsilon_brake=0.1)  # -1 to disable
+                                        steer_count=9, accel_count=3, steer_brake_count=5)
     else:
         env = torcs.BitsPiecesContEnv(nstack=args.num_stack, reward_type=args.reward_type)
 
