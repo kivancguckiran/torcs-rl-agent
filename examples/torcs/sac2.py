@@ -12,7 +12,9 @@ import numpy as np
 import torch
 import torch.optim as optim
 
-from algorithms.common.networks.mlp import MLP, FlattenMLP, TanhGaussianDistParams
+import algorithms.common.networks.mlp as plain
+import algorithms.common.networks.mlp_lstm as lstm
+
 from algorithms.sac.agent import SACAgent
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -37,7 +39,7 @@ hyper_params = {
     "WEIGHT_DECAY": 0.0,
     "INITIAL_RANDOM_ACTION": int(1e4),
     "MULTIPLE_LEARN": 1,
-    "USE_LSTM": True,
+    "USE_LSTM": False,
 }
 
 
@@ -51,49 +53,76 @@ def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int)
         action_dim (int): dimension of actions
 
     """
-    hidden_sizes_actor = [300, 600]
-    hidden_sizes_vf = [300, 600]
-    hidden_sizes_qf = [300, 600]
+    hidden_sizes_actor = [256, 128]
+    hidden_sizes_vf = [256, 128]
+    hidden_sizes_qf = [256, 128]
 
     # target entropy
     target_entropy = -np.prod((action_dim,)).item()  # heuristic
 
     # create actor
-    actor = TanhGaussianDistParams(
-        input_size=state_dim,
-        output_size=action_dim,
-        hidden_sizes=hidden_sizes_actor,
-        use_lstm=hyper_params["USE_LSTM"],
-    ).to(device)
+    if hyper_params["USE_LSTM"]:
+        actor = lstm.TanhGaussianDistParams(
+            input_size=state_dim,
+            output_size=action_dim,
+            hidden_sizes=hidden_sizes_actor
+        ).to(device)
+    else:
+        actor = plain.TanhGaussianDistParams(
+            input_size=state_dim,
+            output_size=action_dim,
+            hidden_sizes=hidden_sizes_actor
+        ).to(device)
 
     # create v_critic
-    vf = MLP(
-        input_size=state_dim,
-        output_size=1,
-        hidden_sizes=hidden_sizes_vf,
-        use_lstm=hyper_params["USE_LSTM"],
-    ).to(device)
-    vf_target = MLP(
-        input_size=state_dim,
-        output_size=1,
-        hidden_sizes=hidden_sizes_vf,
-        use_lstm=hyper_params["USE_LSTM"],
-    ).to(device)
-    vf_target.load_state_dict(vf.state_dict())
+    if hyper_params["USE_LSTM"]:
+        vf = lstm.MLP(
+            input_size=state_dim,
+            output_size=1,
+            hidden_sizes=hidden_sizes_vf
+        ).to(device)
+        vf_target = lstm.MLP(
+            input_size=state_dim,
+            output_size=1,
+            hidden_sizes=hidden_sizes_vf
+        ).to(device)
+        vf_target.load_state_dict(vf.state_dict())
+    else:
+        vf = plain.MLP(
+            input_size=state_dim,
+            output_size=1,
+            hidden_sizes=hidden_sizes_vf
+        ).to(device)
+        vf_target = plain.MLP(
+            input_size=state_dim,
+            output_size=1,
+            hidden_sizes=hidden_sizes_vf
+        ).to(device)
+        vf_target.load_state_dict(vf.state_dict())
 
     # create q_critic
-    qf_1 = FlattenMLP(
-        input_size=state_dim + action_dim,
-        output_size=1,
-        hidden_sizes=hidden_sizes_qf,
-        use_lstm=hyper_params["USE_LSTM"],
-    ).to(device)
-    qf_2 = FlattenMLP(
-        input_size=state_dim + action_dim,
-        output_size=1,
-        hidden_sizes=hidden_sizes_qf,
-        use_lstm=hyper_params["USE_LSTM"],
-    ).to(device)
+    if hyper_params["USE_LSTM"]:
+        qf_1 = lstm.FlattenMLP(
+            input_size=state_dim + action_dim,
+            output_size=1,
+            hidden_sizes=hidden_sizes_qf
+        ).to(device)
+        qf_2 = lstm.FlattenMLP(
+            input_size=state_dim + action_dim,
+            output_size=1,
+            hidden_sizes=hidden_sizes_qf
+        ).to(device)
+    else:
+        qf_1 = plain.FlattenMLP(
+            input_size=state_dim + action_dim,
+            output_size=1,
+            hidden_sizes=hidden_sizes_qf
+        ).to(device)
+        qf_2 = plain.FlattenMLP(
+            input_size=state_dim + action_dim,
+            output_size=1,
+            hidden_sizes=hidden_sizes_qf
+        ).to(device)
 
     # create optimizers
     actor_optim = optim.Adam(

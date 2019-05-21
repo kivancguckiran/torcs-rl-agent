@@ -46,8 +46,16 @@ def init_layer_xavier(layer: nn.Linear, init_w: float = 3e-3) -> nn.Linear:
     return layer
 
 
-class MLP(nn.Module):
-    """Baseline of Multilayer perceptron.
+class LSTMStateHandler:
+    """Includes methods to handle LSTM states."""
+
+    def reset_lstm_state(self):
+        self.hx = torch.zeros(1, self.lstm.input_size).to(device)
+        self.cx = torch.zeros(1, self.lstm.input_size).to(device)
+
+
+class MLP(nn.Module, LSTMStateHandler):
+    """Baseline of Multilayer perceptron with LSTM output.
 
     Attributes:
         input_size (int): size of input
@@ -58,6 +66,7 @@ class MLP(nn.Module):
         hidden_layers (list): list containing linear layers
         use_output_layer (bool): whether or not to use the last layer
         n_category (int): category number (-1 if the action is continuous)
+        use_lstm: bool = False
 
     """
 
@@ -71,7 +80,7 @@ class MLP(nn.Module):
         linear_layer: nn.Module = nn.Linear,
         use_output_layer: bool = True,
         n_category: int = -1,
-        init_fn: Callable = init_layer_xavier,
+        init_fn: Callable = init_layer_xavier
     ):
         """Initialization.
 
@@ -107,6 +116,13 @@ class MLP(nn.Module):
             self.__setattr__("hidden_fc{}".format(i), fc)
             self.hidden_layers.append(fc)
 
+        self.lstm = nn.LSTMCell(in_size, in_size)
+        self.lstm.bias_ih.data.fill_(0)
+        self.lstm.bias_hh.data.fill_(0)
+
+        self.hx, self.cx = None, None
+        self.reset_lstm_state()
+
         # set output layers
         if self.use_output_layer:
             self.output_layer = self.linear_layer(in_size, output_size)
@@ -119,6 +135,11 @@ class MLP(nn.Module):
         """Forward method implementation."""
         for hidden_layer in self.hidden_layers:
             x = self.hidden_activation(hidden_layer(x))
+
+        x = x.view(1, self.lstm.input_size)
+        self.hx, self.cx = self.lstm(x, (self.hx, self.cx))
+        x = self.hx
+
         x = self.output_activation(self.output_layer(x))
 
         return x
@@ -154,7 +175,7 @@ class GaussianDist(MLP):
         mu_activation: Callable = torch.tanh,
         log_std_min: float = -20,
         log_std_max: float = 2,
-        init_fn: Callable = init_layer_xavier,
+        init_fn: Callable = init_layer_xavier
     ):
         """Initialization."""
         super(GaussianDist, self).__init__(
@@ -162,7 +183,7 @@ class GaussianDist(MLP):
             output_size=output_size,
             hidden_sizes=hidden_sizes,
             hidden_activation=hidden_activation,
-            use_output_layer=False,
+            use_output_layer=False
         )
 
         self.mu_activation = mu_activation
