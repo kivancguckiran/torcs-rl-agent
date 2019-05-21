@@ -265,11 +265,16 @@ class DQNAgent(Agent):
 
         Agent.save_params(self, params, n_episode)
 
-    def write_log(self, i: int, loss: np.ndarray, score: float, avg_time_cost: float):
+    def write_log(self, i: int, loss: np.ndarray, score: float, avg_time_cost: float, speed: list = None):
         """Write log about loss and score"""
+
+        max_speed = 0 if speed is None else (max(speed))
+        avg_speed = 0 if speed is None else (sum(speed) / len(speed))
+
         print(
             "[INFO] episode %d, episode step: %d, total step: %d, total score: %f\n"
             "epsilon: %f, loss: %f, avg q-value: %f (spent %.6f sec/step)\n"
+            "track name: %s, race position: %d, max speed %.2f, avg speed %.2f\n"
             % (
                 i,
                 self.episode_step,
@@ -279,13 +284,17 @@ class DQNAgent(Agent):
                 loss[0],
                 loss[1],
                 avg_time_cost,
+                self.env.track_name,
+                self.env.last_obs['racePos'],
+                max_speed,
+                avg_speed
             )
         )
 
         if self.args.log:
             with open(self.log_filename, "a") as file:
                 file.write(
-                    "%d;%d;%d;%f;%f;%f;%f;%.6f\n"
+                    "%d;%d;%d;%f;%f;%f;%f;%.6f;%s;%d;%.2f;%.2f\n"
                     % (
                         i,
                         self.episode_step,
@@ -295,6 +304,10 @@ class DQNAgent(Agent):
                         loss[0],
                         loss[1],
                         avg_time_cost,
+                        self.env.track_name,
+                        self.env.last_obs['racePos'],
+                        max_speed,
+                        avg_speed
                     )
                 )
 
@@ -327,6 +340,7 @@ class DQNAgent(Agent):
             losses = list()
             done = False
             score = 0
+            speed = list()
 
             t_begin = time.time()
 
@@ -335,6 +349,8 @@ class DQNAgent(Agent):
                 next_state, reward, done = self.step(action)
                 self.total_step += 1
                 self.episode_step += 1
+
+                speed.append(self.env.last_speed)
 
                 if len(self.memory) >= self.hyper_params["UPDATE_STARTS_FROM"]:
                     if self.total_step % self.hyper_params["TRAIN_FREQ"] == 0:
@@ -356,7 +372,7 @@ class DQNAgent(Agent):
 
             if losses:
                 avg_loss = np.vstack(losses).mean(axis=0)
-                self.write_log(self.i_episode, avg_loss, score, avg_time_cost)
+                self.write_log(self.i_episode, avg_loss, score, avg_time_cost, speed)
 
             if self.i_episode % self.args.save_period == 0:
                 self.save_params(self.i_episode)

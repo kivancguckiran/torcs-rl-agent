@@ -123,6 +123,10 @@ class TorcsEnv:
         # Get the current full-observation from torcs
         obs = client.S.d
 
+        self.last_obs = copy.deepcopy(obs)
+        self.last_speed = np.sqrt(obs['speedX']**2 + obs['speedY']**2)
+
+
         # Make an obsevation from a raw observation vector from TORCS
         self.observation = self.make_observaton(obs)
 
@@ -144,6 +148,12 @@ class TorcsEnv:
             reward = progress - np.abs(sp * np.sin(obs["angle"])) - sp * np.abs(obs['trackPos'])
         elif self.reward_type == 'no_penalty':
             reward = progress
+        elif self.reward_type == 'race_pos':
+            reward = progress - np.abs(sp * np.sin(obs["angle"]))  # no trackpos
+            if obs['racePos'] > obs_pre['racePos']:
+                reward += 1
+            elif obs['racePos'] < obs_pre['racePos']:
+                reward -= 1
 
         # collision detection
         if obs['damage'] - obs_pre['damage'] > 0:
@@ -196,7 +206,7 @@ class TorcsEnv:
         if relaunch:
             if sampletrack:
                 try:
-                    sample_track(self.root, self.reset_counter)
+                    self.track_name, _ = sample_track(self.root, self.reset_counter)
                     self.reset_counter += 1
                 except AttributeError:
                     pass
