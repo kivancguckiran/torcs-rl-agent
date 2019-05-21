@@ -55,7 +55,7 @@ class LSTMStateHandler:
 
 
 class MLP(nn.Module, LSTMStateHandler):
-    """Baseline of Multilayer perceptron.
+    """Baseline of Multilayer perceptron with LSTM output.
 
     Attributes:
         input_size (int): size of input
@@ -80,8 +80,7 @@ class MLP(nn.Module, LSTMStateHandler):
         linear_layer: nn.Module = nn.Linear,
         use_output_layer: bool = True,
         n_category: int = -1,
-        init_fn: Callable = init_layer_xavier,
-        use_lstm: bool = False,
+        init_fn: Callable = init_layer_xavier
     ):
         """Initialization.
 
@@ -117,14 +116,12 @@ class MLP(nn.Module, LSTMStateHandler):
             self.__setattr__("hidden_fc{}".format(i), fc)
             self.hidden_layers.append(fc)
 
-        self.use_lstm = use_lstm
+        self.lstm = nn.LSTMCell(in_size, in_size)
+        self.lstm.bias_ih.data.fill_(0)
+        self.lstm.bias_hh.data.fill_(0)
 
-        if self.use_lstm:
-            self.lstm = nn.LSTMCell(in_size, in_size)
-            self.lstm.bias_ih.data.fill_(0)
-            self.lstm.bias_hh.data.fill_(0)
-            self.hx, self.cx = None, None
-            self.reset_lstm_state()
+        self.hx, self.cx = None, None
+        self.reset_lstm_state()
 
         # set output layers
         if self.use_output_layer:
@@ -139,91 +136,13 @@ class MLP(nn.Module, LSTMStateHandler):
         for hidden_layer in self.hidden_layers:
             x = self.hidden_activation(hidden_layer(x))
 
-        if self.use_lstm:
-            x = x.view(1, self.lstm.input_size)
-            self.hx, self.cx = self.lstm(x, (self.hx, self.cx))
-            x = self.hx
+        x = x.view(1, self.lstm.input_size)
+        self.hx, self.cx = self.lstm(x, (self.hx, self.cx))
+        x = self.hx
 
         x = self.output_activation(self.output_layer(x))
 
         return x
-
-# class MLP(nn.Module):
-#     """Baseline of Multilayer perceptron.
-#
-#     Attributes:
-#         input_size (int): size of input
-#         output_size (int): size of output layer
-#         hidden_sizes (list): sizes of hidden layers
-#         hidden_activation (function): activation function of hidden layers
-#         output_activation (function): activation function of output layer
-#         hidden_layers (list): list containing linear layers
-#         use_output_layer (bool): whether or not to use the last layer
-#         n_category (int): category number (-1 if the action is continuous)
-#
-#     """
-#
-#     def __init__(
-#         self,
-#         input_size: int,
-#         output_size: int,
-#         hidden_sizes: list,
-#         hidden_activation: Callable = F.relu,
-#         output_activation: Callable = identity,
-#         linear_layer: nn.Module = nn.Linear,
-#         use_output_layer: bool = True,
-#         n_category: int = -1,
-#         init_fn: Callable = init_layer_xavier,
-#     ):
-#         """Initialization.
-#
-#         Args:
-#             input_size (int): size of input
-#             output_size (int): size of output layer
-#             hidden_sizes (list): number of hidden layers
-#             hidden_activation (function): activation function of hidden layers
-#             output_activation (function): activation function of output layer
-#             linear_layer (nn.Module): linear layer of mlp
-#             use_output_layer (bool): whether or not to use the last layer
-#             n_category (int): category number (-1 if the action is continuous)
-#             init_fn (Callable): weight initialization function bound for the last layer
-#
-#         """
-#         super(MLP, self).__init__()
-#
-#         self.hidden_sizes = hidden_sizes
-#         self.input_size = input_size
-#         self.output_size = output_size
-#         self.hidden_activation = hidden_activation
-#         self.output_activation = output_activation
-#         self.linear_layer = linear_layer
-#         self.use_output_layer = use_output_layer
-#         self.n_category = n_category
-#
-#         # set hidden layers
-#         self.hidden_layers: list = []
-#         in_size = self.input_size
-#         for i, next_size in enumerate(hidden_sizes):
-#             fc = self.linear_layer(in_size, next_size)
-#             in_size = next_size
-#             self.__setattr__("hidden_fc{}".format(i), fc)
-#             self.hidden_layers.append(fc)
-#
-#         # set output layers
-#         if self.use_output_layer:
-#             self.output_layer = self.linear_layer(in_size, output_size)
-#             self.output_layer = init_fn(self.output_layer)
-#         else:
-#             self.output_layer = identity
-#             self.output_activation = identity
-#
-#     def forward(self, x: torch.Tensor) -> torch.Tensor:
-#         """Forward method implementation."""
-#         for hidden_layer in self.hidden_layers:
-#             x = self.hidden_activation(hidden_layer(x))
-#         x = self.output_activation(self.output_layer(x))
-#
-#         return x
 
 
 class FlattenMLP(MLP):
@@ -256,8 +175,7 @@ class GaussianDist(MLP):
         mu_activation: Callable = torch.tanh,
         log_std_min: float = -20,
         log_std_max: float = 2,
-        init_fn: Callable = init_layer_xavier,
-        use_lstm: bool = False,
+        init_fn: Callable = init_layer_xavier
     ):
         """Initialization."""
         super(GaussianDist, self).__init__(
@@ -265,8 +183,7 @@ class GaussianDist(MLP):
             output_size=output_size,
             hidden_sizes=hidden_sizes,
             hidden_activation=hidden_activation,
-            use_output_layer=False,
-            use_lstm=False,
+            use_output_layer=False
         )
 
         self.mu_activation = mu_activation
