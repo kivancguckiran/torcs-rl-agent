@@ -2,6 +2,7 @@ from gym_torcs import TorcsEnv
 from gym import spaces
 import numpy as np
 from collections import deque
+import torch
 
 
 STEER = 0
@@ -38,6 +39,9 @@ class DefaultEnv(TorcsEnv):
             self.stack_buffer.append(next_state)
             next_state = np.asarray(self.stack_buffer).flatten()
         return next_state, reward, done, info
+
+    def try_break(self, action):
+        return action
 
 
 class NoBrakeNoBackwardsEnv(DefaultEnv):
@@ -104,6 +108,10 @@ class BitsPiecesContEnv(DefaultEnv):
             env_u[BRAKE] = (abs(u[1]) * 2) - 1
 
         return super().step(env_u)
+
+    def try_break(self, u):
+        u[1] = torch.rand(1) - 1
+        return u
 
 
 class DiscretizedEnv(DefaultEnv):

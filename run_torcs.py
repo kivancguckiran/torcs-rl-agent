@@ -40,7 +40,7 @@ parser.add_argument(
 parser.add_argument(
     "--num-stack", type=int, default=1, help="number of states to stack")
 parser.add_argument(
-    "--reward-type", type=str, default="extra", help="reward type")
+    "--reward-type", type=str, default="extra_github", help="reward type")
 
 parser.set_defaults(test=False)
 parser.set_defaults(load_from=None)

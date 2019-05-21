@@ -40,6 +40,7 @@ hyper_params = {
     "INITIAL_RANDOM_ACTION": int(1e4),
     "MULTIPLE_LEARN": 1,
     "USE_LSTM": False,
+    "TRY_BREAK": int(1e5)
 }
 
 
@@ -53,9 +54,9 @@ def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int)
         action_dim (int): dimension of actions
 
     """
-    hidden_sizes_actor = [256, 128]
-    hidden_sizes_vf = [256, 128]
-    hidden_sizes_qf = [256, 128]
+    hidden_sizes_actor = [256, 128, 64]
+    hidden_sizes_vf = [256, 128, 64]
+    hidden_sizes_qf = [256, 128, 64]
 
     # target entropy
     target_entropy = -np.prod((action_dim,)).item()  # heuristic
