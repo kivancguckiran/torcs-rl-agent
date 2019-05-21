@@ -14,7 +14,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from algorithms.common.networks.cnn import CNN
-from algorithms.common.networks.mlp import MLP, init_layer_uniform
+from algorithms.common.networks.mlp import MLP, init_layer_uniform, init_layer_xavier
 from algorithms.dqn.linear import NoisyMLPHandler
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -30,7 +30,7 @@ class DuelingMLP(MLP, NoisyMLPHandler):
         hidden_sizes: list,
         hidden_activation: Callable = F.relu,
         linear_layer: nn.Module = nn.Linear,
-        init_fn: Callable = init_layer_uniform,
+        init_fn: Callable = init_layer_xavier,
     ):
         """Initialization."""
         super(DuelingMLP, self).__init__(
@@ -100,7 +100,7 @@ class C51DuelingMLP(MLP, NoisyMLPHandler):
         v_max: int = 10,
         hidden_activation: Callable = F.relu,
         linear_layer: nn.Module = nn.Linear,
-        init_fn: Callable = init_layer_uniform,
+        init_fn: Callable = init_layer_xavier,
     ):
         """Initialization."""
         super(C51DuelingMLP, self).__init__(
@@ -185,7 +185,7 @@ class IQNMLP(MLP, NoisyMLPHandler):
         quantile_embedding_dim: int,
         hidden_activation: Callable = F.relu,
         linear_layer: nn.Module = nn.Linear,
-        init_fn: Callable = init_layer_uniform,
+        init_fn: Callable = init_layer_xavier,
     ):
         """Initialization."""
         super(IQNMLP, self).__init__(

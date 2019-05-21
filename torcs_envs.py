@@ -128,6 +128,44 @@ class DiscretizedEnv(DefaultEnv):
         return super().step(env_u)
 
 
+class DiscretizedInriaEnv(DefaultEnv):
+    def __init__(self, port=3101, nstack=1, reward_type='no_trackpos',
+                 steer_count=9, accel_count=3, steer_brake_count=5,
+                 epsilon_brake=-1):
+        super().__init__(port, nstack, reward_type)
+
+        assert steer_count % 2 == 1
+        assert accel_count > 1
+        assert steer_brake_count % 2 == 1
+
+        n_steer_accel = steer_count * accel_count
+        self.action_space = spaces.Discrete(steer_count * accel_count + steer_brake_count)
+
+        self.accel_actions = np.zeros(self.action_space.n)
+        self.steer_actions = np.zeros(self.action_space.n)
+        self.brake_actions = np.zeros(self.action_space.n)
+
+        self.accel_actions[:n_steer_accel] = np.tile(np.linspace(0, 1, accel_count), steer_count)
+        self.steer_actions[:n_steer_accel] = np.repeat(np.linspace(-1, 1, steer_count), accel_count)
+        self.steer_actions[n_steer_accel:] = np.linspace(-1, 1, steer_brake_count)
+        self.brake_actions[n_steer_accel:] = np.ones(steer_brake_count)
+
+        self.epsilon_brake = epsilon_brake  # default -1 which means no soft brake
+        self.index_brake = self.action_space.n - round(steer_brake_count / 2) - 1
+
+    def step(self, u):
+        env_u = np.zeros(3)
+
+        if np.random.random() < self.epsilon_brake:
+            u = self.index_brake
+
+        env_u[ACCELERATE] = self.accel_actions[u]
+        env_u[STEER] = self.steer_actions[u]
+        env_u[BRAKE] = self.brake_actions[u]
+
+        return super().step(env_u)
+
+
 class DiscretizedOldEnv(DefaultEnv):
     def __init__(self, port=3101, nstack=1, reward_type='no_trackpos'):
         super().__init__(port, nstack, reward_type)
