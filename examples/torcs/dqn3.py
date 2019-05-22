@@ -70,7 +70,7 @@ def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int)
     """
     # create model
     def get_fc_model():
-        hidden_sizes = [512, 256, 128]
+        hidden_sizes = [512, 256]
 
         if hyper_params["USE_NOISY_NET"]:
             # use noisy net
