@@ -40,7 +40,7 @@ class DefaultEnv(TorcsEnv):
             next_state = np.asarray(self.stack_buffer).flatten()
         return next_state, reward, done, info
 
-    def try_break(self, action):
+    def try_brake(self, action):
         return action
 
 
@@ -109,7 +109,7 @@ class BitsPiecesContEnv(DefaultEnv):
 
         return super().step(env_u)
 
-    def try_break(self, u):
+    def try_brake(self, u):
         u[1] = torch.rand(1) - 1
         return u
 
@@ -166,7 +166,7 @@ class DiscretizedInriaEnv(DefaultEnv):
 
         return super().step(env_u)
 
-    def try_break(self, u):
+    def try_brake(self, u):
         return np.random.randint(self.n_steer_accel, self.action_space.n)
 
 

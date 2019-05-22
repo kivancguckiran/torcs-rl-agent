@@ -107,6 +107,14 @@ class SACAgent(Agent):
                 self.hyper_params["BUFFER_SIZE"], self.hyper_params["BATCH_SIZE"]
             )
 
+            brake_x = np.linspace(
+                0,
+                self.hyper_params["BRAKE_REGION"],
+                self.hyper_params["BRAKE_REGION"],
+            )
+
+            self.brakes = np.exp(-np.power(brake_x - self.hyper_params["BRAKE_DIST_MU"], 2.) / (2 * np.power(self.hyper_params["BRAKE_DIST_SIGMA"], 2.)))
+
     def select_action(self, state: np.ndarray) -> np.ndarray:
         """Select an action from the input space."""
         self.curr_state = state
@@ -368,9 +376,9 @@ class SACAgent(Agent):
             while not done:
                 action = self.select_action(state)
 
-                if "TRY_BREAK" in self.hyper_params and self.total_step < self.hyper_params["TRY_BREAK"]:
-                    if np.random.random() < 0.1:
-                        action = self.env.try_break(action)
+                if "BRAKE_REGION" in self.hyper_params and self.total_step < self.hyper_params["BRAKE_REGION"]:
+                    if np.random.random() < self.brakes[self.i_episode] * self.hyper_params["BRAKE_FACTOR"]:
+                        action = self.env.try_brake(action)
 
                 next_state, reward, done = self.step(action)
                 self.total_step += 1
