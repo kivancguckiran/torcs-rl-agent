@@ -239,34 +239,37 @@ class TD3Agent(Agent):
         )
 
         if self.args.log:
-            wandb.log(
-                {
-                    "score": score,
-                    "total loss": total_loss,
-                    "actor loss": loss[0] * policy_update_freq,
-                    "critic1 loss": loss[1],
-                    "critic2 loss": loss[2],
-                }
-            )
+            with open(self.log_filename, "a") as file:
+                file.write(
+                    "%d;%.3f;%.3f;%.3f;%.3f\n"
+                    % (
+                        i,
+                        total_loss,
+                        loss[0] * policy_update_freq,
+                        loss[1],
+                        loss[2],
+                    )
+                )
 
     def train(self):
         """Train the agent."""
         # logger
-        if self.args.log:
-            wandb.init(project=self.args.wandb_project)
-            wandb.config.update(self.hyper_params)
-            # wandb.watch([self.actor, self.critic1, self.critic2], log="parameters")
+        # if self.args.log:
+        #     wandb.init(project=self.args.wandb_project)
+        #     wandb.config.update(self.hyper_params)
+        #     # wandb.watch([self.actor, self.critic1, self.critic2], log="parameters")
 
         for self.i_episode in range(1, self.args.episode_num + 1):
-            state = self.env.reset()
+            is_relaunch = (self.i_episode - 1) % self.args.relaunch_period == 0
+            state = self.env.reset(relaunch=is_relaunch, render=False, sampletrack=True)
             done = False
             score = 0
             loss_episode = list()
             self.episode_step = 0
 
             while not done:
-                if self.args.render and self.i_episode >= self.args.render_after:
-                    self.env.render()
+                # if self.args.render and self.i_episode >= self.args.render_after:
+                #     self.env.render()
 
                 action = self.select_action(state)
                 next_state, reward, done = self.step(action)
@@ -290,8 +293,10 @@ class TD3Agent(Agent):
                     score,
                     self.hyper_params["POLICY_UPDATE_FREQ"],
                 )
+
             if self.i_episode % self.args.save_period == 0:
                 self.save_params(self.i_episode)
+            if self.i_episode % self.args.test_period == 0:
                 self.interim_test()
 
         # termination
