@@ -47,7 +47,7 @@ class TorcsEnv:
 
     initial_reset = True
 
-    def __init__(self, port=3101, path=None, reward_type='original'):
+    def __init__(self, port=3101, path=None, reward_type='original', track='none'):
         self.port = port
         self.initial_run = True
         self.reward_type = reward_type
@@ -57,7 +57,9 @@ class TorcsEnv:
         if path:
             self.tree = ET.parse(path)
             self.root = self.tree.getroot()
-            self.path=path
+            self.path = path
+
+        self.track = track
 
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(3,))
         high = np.concatenate([
@@ -224,7 +226,7 @@ class TorcsEnv:
         if relaunch:
             if sampletrack:
                 try:
-                    self.track_name, _ = sample_track(self.root, self.reset_counter)
+                    self.track_name, _ = sample_track(self.root, self.reset_counter, self.track)
                     self.reset_counter += 1
                 except AttributeError:
                     pass
