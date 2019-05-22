@@ -37,6 +37,7 @@ hyper_params = {
     "WEIGHT_DECAY": 0.0,
     "INITIAL_RANDOM_ACTION": int(1e4),
     "MULTIPLE_LEARN": 1,
+    "USE_LSTM": False,
 }
 
 

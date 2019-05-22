@@ -136,7 +136,7 @@ class MLP(nn.Module, LSTMStateHandler):
         for hidden_layer in self.hidden_layers:
             x = self.hidden_activation(hidden_layer(x))
 
-        x = x.view(1, self.lstm.input_size)
+        x = torch.cat(x).view(len(x), 1, -1)
         self.hx, self.cx = self.lstm(x, (self.hx, self.cx))
         x = self.hx
 
