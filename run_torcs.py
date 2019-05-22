@@ -54,10 +54,10 @@ args = parser.parse_args()
 def main():
     if args.algo == "dqn":
         env = torcs.DiscretizedOldEnv(nstack=args.num_stack, reward_type=args.reward_type, track=args.track)
-    elif args.algo == "dqn2" or args.algo == "sac-discrete":
+    elif args.algo == "dqn2":
         env = torcs.DiscretizedEnv(nstack=args.num_stack, reward_type=args.reward_type, track=args.track,
                                    action_count=21)
-    elif args.algo.startswith("dqn"):
+    elif args.algo.startswith("dqn") or args.algo == "sac-discrete":
         env = torcs.DiscretizedInriaEnv(nstack=args.num_stack, reward_type=args.reward_type, track=args.track,
                                         steer_count=9, accel_count=3, steer_brake_count=5)
     else:

@@ -29,7 +29,7 @@ hyper_params = {
     "TAU": 5e-3,
     "W_N_STEP": 1.0,
     "W_Q_REG": 1e-7,
-    "BUFFER_SIZE": int(2e5),
+    "BUFFER_SIZE": int(1e5),
     "BATCH_SIZE": 32,
     "LR_DQN": 1e-4,  # dueling: 6.25e-5
     "ADAM_EPS": 1e-8,  # rainbow: 1.5e-4
@@ -41,7 +41,7 @@ hyper_params = {
     "PER_BETA": 0.4,
     "PER_EPS": 1e-6,
     "GRADIENT_CLIP": 10.0,
-    "UPDATE_STARTS_FROM": int(2e4),
+    "UPDATE_STARTS_FROM": int(1e4),
     "TRAIN_FREQ": 1,
     "MULTIPLE_LEARN": 1,
     # Distributional Q function
@@ -54,7 +54,6 @@ hyper_params = {
     "STD_INIT": 0.5,
     # Others
     "USE_LSTM": False,
-    "TRY_BRAKE": int(2e5)
 }
 
 
@@ -70,7 +69,7 @@ def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int)
     """
     # create model
     def get_fc_model():
-        hidden_sizes = [512, 256]
+        hidden_sizes = [128, 128, 128]
 
         if hyper_params["USE_NOISY_NET"]:
             # use noisy net
