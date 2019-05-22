@@ -39,14 +39,17 @@ def _find_by_tag(nodes, tag):
         if node.tag == tag:
             return node
 
-def sample_track(root_node, counter):
+def sample_track(root_node, counter, track):
     node = _find_by_name(root_node, "Tracks")
     subnode = _find_by_tag(node, "section")
     trackname_node, tracktype_node = subnode.getchildren()
     
     # trackname, tracktype = random.sample(TRACKS, 1)[0]
     # trackname, tracktype = random.sample(NEW_TRACKS, 1)[0]
-    trackname, tracktype = NEW_TRACKS[counter % len(NEW_TRACKS)]
+    if track != 'none':
+        trackname, tracktype = track, 'road'
+    else:
+        trackname, tracktype = NEW_TRACKS[counter % len(NEW_TRACKS)]
     print(trackname, tracktype)
 
     trackname_node.attrib["val"] = trackname
