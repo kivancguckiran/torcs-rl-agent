@@ -37,7 +37,6 @@ hyper_params = {
     "WEIGHT_DECAY": 0.0,
     "INITIAL_RANDOM_ACTION": int(1e4),
     "MULTIPLE_LEARN": 1,
-    "USE_LSTM": False,
     "BRAKE_REGION": int(2e5),
     "BRAKE_DIST_MU": int(1e5),
     "BRAKE_DIST_SIGMA": int(2.5e4),
