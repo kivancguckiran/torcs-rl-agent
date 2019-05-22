@@ -5,4 +5,5 @@ logs
 .idea
 .mypy_cache
 .DS_Store
+.vscode
 MUJOCO_LOG.TXT
