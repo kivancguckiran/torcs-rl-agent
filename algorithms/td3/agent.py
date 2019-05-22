@@ -219,13 +219,18 @@ class TD3Agent(Agent):
         Agent.save_params(self, params, n_episode)
 
     def write_log(
-        self, i: int, loss: np.ndarray, score: float = 0.0, policy_update_freq: int = 1
+        self, i: int, loss: np.ndarray, score: float = 0.0, policy_update_freq: int = 1, speed: list = None
     ):
         """Write log about loss and score"""
         total_loss = loss.sum()
+
+        max_speed = 0 if speed is None else (max(speed))
+        avg_speed = 0 if speed is None else (sum(speed) / len(speed))
+
         print(
             "[INFO] episode %d, episode_step: %d, total_step: %d, total score: %d\n"
             "total loss: %f actor_loss: %.3f critic1_loss: %.3f critic2_loss: %.3f\n"
+            "track name: %s, race position: %d, max speed %.2f, avg speed %.2f\n"
             % (
                 i,
                 self.episode_step,
@@ -235,29 +240,40 @@ class TD3Agent(Agent):
                 loss[0] * policy_update_freq,  # actor loss
                 loss[1],  # critic1 loss
                 loss[2],  # critic2 loss
+                self.env.track_name,
+                self.env.last_obs['racePos'],
+                max_speed,
+                avg_speed
             )
         )
 
         if self.args.log:
             with open(self.log_filename, "a") as file:
                 file.write(
-                    "%d;%.3f;%.3f;%.3f;%.3f\n"
+                    "%d;%d;%d;%d;%f;%.3f;%.3f;%.3f;%s;%d;%.2f;%.2f\n"
                     % (
                         i,
+                        self.episode_step,
+                        self.total_step,
+                        score,
                         total_loss,
-                        loss[0] * policy_update_freq,
-                        loss[1],
-                        loss[2],
+                        loss[0] * policy_update_freq,  # actor loss
+                        loss[1],  # critic1 loss
+                        loss[2],  # critic2 loss
+                        self.env.track_name,
+                        self.env.last_obs['racePos'],
+                        max_speed,
+                        avg_speed
                     )
                 )
 
     def train(self):
         """Train the agent."""
         # logger
-        # if self.args.log:
-        #     wandb.init(project=self.args.wandb_project)
-        #     wandb.config.update(self.hyper_params)
-        #     # wandb.watch([self.actor, self.critic1, self.critic2], log="parameters")
+        if self.args.log:
+            with open(self.log_filename, "w") as file:
+                file.write(str(self.args) + "\n")
+                file.write(str(self.hyper_params) + "\n")
 
         for self.i_episode in range(1, self.args.episode_num + 1):
             is_relaunch = (self.i_episode - 1) % self.args.relaunch_period == 0
@@ -266,15 +282,20 @@ class TD3Agent(Agent):
             score = 0
             loss_episode = list()
             self.episode_step = 0
+            speed = list()
 
             while not done:
-                # if self.args.render and self.i_episode >= self.args.render_after:
-                #     self.env.render()
-
                 action = self.select_action(state)
+
+                if "TRY_BREAK" in self.hyper_params and self.total_step < self.hyper_params["TRY_BREAK"]:
+                    if np.random.random() < 0.1:
+                        action = self.env.try_break(action)
+
                 next_state, reward, done = self.step(action)
                 self.total_step += 1
                 self.episode_step += 1
+
+                speed.append(self.env.last_speed)
 
                 state = next_state
                 score += reward
@@ -292,6 +313,7 @@ class TD3Agent(Agent):
                     avg_loss,
                     score,
                     self.hyper_params["POLICY_UPDATE_FREQ"],
+                    speed
                 )
 
             if self.i_episode % self.args.save_period == 0:

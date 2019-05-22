@@ -22,7 +22,7 @@ hyper_params = {
     "GAMMA": 0.99,
     "TAU": 5e-3,
     "BUFFER_SIZE": int(1e5),
-    "BATCH_SIZE": 100,
+    "BATCH_SIZE": 128,
     "LR_ACTOR": 1e-3,
     "LR_CRITIC": 1e-3,
     "WEIGHT_DECAY": 0.0,
@@ -31,6 +31,7 @@ hyper_params = {
     "TARGET_POLICY_NOISE": 0.2,
     "TARGET_POLICY_NOISE_CLIP": 0.5,
     "INITIAL_RANDOM_ACTION": int(1e4),
+    "TRY_BRAKE": int(1e5)
 }
 
 
@@ -44,8 +45,8 @@ def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int)
         action_dim (int): dimension of actions
 
     """
-    hidden_sizes_actor = [300, 600]
-    hidden_sizes_critic = [300, 600]
+    hidden_sizes_actor = [256, 512]
+    hidden_sizes_critic = [256, 512]
 
     # create actor
     actor = MLP(
