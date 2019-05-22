@@ -353,7 +353,7 @@ class DQNAgent(Agent):
             while not done:
                 action = self.select_action(state)
 
-                if "TRY_BREAK" in self.hyper_params and self.total_step < self.hyper_params["TRY_BREAK"]:
+                if "TRY_BRAKE" in self.hyper_params and self.total_step < self.hyper_params["TRY_BRAKE"]:
                     if np.random.random() < 0.1:
                         action = self.env.try_break(action)
 
