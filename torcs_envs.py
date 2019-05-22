@@ -145,17 +145,17 @@ class DiscretizedInriaEnv(DefaultEnv):
         assert accel_count > 1
         assert steer_brake_count % 2 == 1
 
-        n_steer_accel = steer_count * accel_count
+        self.n_steer_accel = steer_count * accel_count
         self.action_space = spaces.Discrete(steer_count * accel_count + steer_brake_count)
 
         self.accel_actions = np.zeros(self.action_space.n)
         self.steer_actions = np.zeros(self.action_space.n)
         self.brake_actions = np.zeros(self.action_space.n)
 
-        self.accel_actions[:n_steer_accel] = np.tile(np.linspace(0, 1, accel_count), steer_count)
-        self.steer_actions[:n_steer_accel] = np.repeat(np.linspace(-1, 1, steer_count), accel_count)
-        self.steer_actions[n_steer_accel:] = np.linspace(-1, 1, steer_brake_count)
-        self.brake_actions[n_steer_accel:] = np.ones(steer_brake_count)
+        self.accel_actions[:self.n_steer_accel] = np.tile(np.linspace(0, 1, accel_count), steer_count)
+        self.steer_actions[:self.n_steer_accel] = np.repeat(np.linspace(-1, 1, steer_count), accel_count)
+        self.steer_actions[self.n_steer_accel:] = np.linspace(-1, 1, steer_brake_count)
+        self.brake_actions[self.n_steer_accel:] = np.ones(steer_brake_count)
 
     def step(self, u):
         env_u = np.zeros(3)
@@ -165,6 +165,9 @@ class DiscretizedInriaEnv(DefaultEnv):
         env_u[BRAKE] = self.brake_actions[u]
 
         return super().step(env_u)
+
+    def try_break(self, u):
+        return np.random.randint(self.n_steer_accel, self.action_space.n)
 
 
 class DiscretizedOldEnv(DefaultEnv):

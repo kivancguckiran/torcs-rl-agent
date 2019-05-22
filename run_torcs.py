@@ -38,7 +38,7 @@ parser.add_argument(
 parser.add_argument(
     "--test-period", type=int, default=100, help="test period")
 parser.add_argument(
-    "--num-stack", type=int, default=1, help="number of states to stack")
+    "--num-stack", type=int, default=4, help="number of states to stack")
 parser.add_argument(
     "--reward-type", type=str, default="extra_github", help="reward type")
 parser.add_argument(
@@ -53,17 +53,15 @@ args = parser.parse_args()
 
 def main():
     if args.algo == "dqn":
-        env = torcs.DiscretizedOldEnv(nstack=args.num_stack, reward_type=args.reward_type,
-                                    track=args.track)
+        env = torcs.DiscretizedOldEnv(nstack=args.num_stack, reward_type=args.reward_type, track=args.track)
     elif args.algo == "dqn2" or args.algo == "sac-discrete":
-        env = torcs.DiscretizedEnv(nstack=args.num_stack, reward_type=args.reward_type,
-                                    action_count=21, track=args.track)
+        env = torcs.DiscretizedEnv(nstack=args.num_stack, reward_type=args.reward_type, track=args.track,
+                                   action_count=21)
     elif args.algo.startswith("dqn"):
-        env = torcs.DiscretizedInriaEnv(nstack=args.num_stack, reward_type=args.reward_type,
-                                    steer_count=9, accel_count=3, steer_brake_count=5, track=args.track)
+        env = torcs.DiscretizedInriaEnv(nstack=args.num_stack, reward_type=args.reward_type, track=args.track,
+                                        steer_count=9, accel_count=3, steer_brake_count=5)
     else:
-        env = torcs.BitsPiecesContEnv(nstack=args.num_stack, reward_type=args.reward_type,
-                                    track=args.track)
+        env = torcs.BitsPiecesContEnv(nstack=args.num_stack, reward_type=args.reward_type, track=args.track)
 
     # run
     module_path = "examples.torcs." + args.algo

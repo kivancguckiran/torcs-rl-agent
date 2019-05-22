@@ -191,6 +191,11 @@ class DQNAgent(Agent):
 
     def update_model(self) -> Tuple[torch.Tensor, torch.Tensor]:
         """Train the model after each episode."""
+
+        if "USE_LSTM" in self.hyper_params and self.hyper_params["USE_LSTM"]:
+            self.dqn.reset_lstm_state()
+            self.dqn_target.reset_lstm_state()
+
         # 1 step loss
         experiences_1 = self.memory.sample(self.beta)
         weights, indices = experiences_1[-2:]
@@ -345,12 +350,13 @@ class DQNAgent(Agent):
 
             t_begin = time.time()
 
-            if "USE_LSTM" in self.hyper_params and self.hyper_params["USE_LSTM"]:
-                self.dqn.reset_lstm_state()
-                self.dqn_target.reset_lstm_state()
-
             while not done:
                 action = self.select_action(state)
+
+                if "TRY_BREAK" in self.hyper_params and self.total_step < self.hyper_params["TRY_BREAK"]:
+                    if np.random.random() < 0.1:
+                        action = self.env.try_break(action)
+
                 next_state, reward, done = self.step(action)
                 self.total_step += 1
                 self.episode_step += 1
