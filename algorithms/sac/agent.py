@@ -366,13 +366,6 @@ class SACAgent(Agent):
             loss_episode = list()
             speed = list()
 
-            if self.hyper_params["USE_LSTM"]:
-                self.actor.reset_lstm_state()
-                self.vf.reset_lstm_state()
-                self.vf_target.reset_lstm_state()
-                self.qf_1.reset_lstm_state()
-                self.qf_2.reset_lstm_state()
-
             while not done:
                 action = self.select_action(state)
 
