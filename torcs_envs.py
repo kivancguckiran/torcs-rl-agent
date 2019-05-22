@@ -150,7 +150,7 @@ class DiscretizedInriaEnv(DefaultEnv):
 
         self.accel_actions = np.zeros(self.action_space.n)
         self.steer_actions = np.zeros(self.action_space.n)
-        self.brake_actions = np.zeros(self.action_space.n)
+        self.brake_actions = np.ones(self.action_space.n) * -1.0
 
         self.accel_actions[:self.n_steer_accel] = np.tile(np.linspace(0, 1, accel_count), steer_count)
         self.steer_actions[:self.n_steer_accel] = np.repeat(np.linspace(-1, 1, steer_count), accel_count)
