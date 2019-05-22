@@ -50,6 +50,8 @@ hyper_params = {
     # NoisyNet
     "USE_NOISY_NET": True,
     "STD_INIT": 0.5,
+    # Temporal
+    "USE_LSTM": False
 }
 
 

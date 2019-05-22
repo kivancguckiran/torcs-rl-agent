@@ -42,7 +42,7 @@ class TorcsEnv:
         reset: send a message to reset the game.
 
     """
-    terminal_judge_start = 50  # Speed limit is applied after this step
+    terminal_judge_start = 1000  # Speed limit is applied after this step
     termination_limit_progress = 5/200  # [km/h], episode terminates if car is running slower than this limit
 
     initial_reset = True
@@ -153,12 +153,20 @@ class TorcsEnv:
         elif self.reward_type == 'endtoend': # https://team.inria.fr/rits/files/2018/02/ICRA18_EndToEndDriving_CameraReady.pdf
             reward = sp * (np.cos(obs['angle']) - np.abs(obs['trackPos']))
         elif self.reward_type == 'extra': # https://github.com/bhanuvikasr/Deep-RL-TORCS/blob/master/report.pdf
-            Vx = obs['speedX']
-            Vy = obs['speedY']
+            Vx = obs['speedX'] / 200
+            Vy = obs['speedY'] / 200
             trackpos = np.abs(obs['trackPos'])
             sintheta = np.abs(np.sin(obs['angle']))
             costheta = np.cos(obs['angle'])
             reward = Vx * costheta - Vx * sintheta - Vx * trackpos * sintheta - Vy * costheta
+        elif self.reward_type == 'extra_github':
+            speedX = obs['speedX'] / 200
+            speedY = obs['speedY'] / 200
+            reward = speedX * np.cos(1.0 * obs['angle']) \
+                        - np.abs(1.0 * speedX * np.sin(obs['angle'])) \
+                        - 2 * speedX * np.abs(obs['trackPos'] * np.sin(obs['angle'])) \
+                        - speedY * np.cos(obs['angle'])
+
         elif self.reward_type == 'race_pos':
             reward = progress - np.abs(sp * np.sin(obs["angle"]))  # no trackpos
             if obs['racePos'] > obs_pre['racePos']:
@@ -172,8 +180,7 @@ class TorcsEnv:
             reward = -1
 
         if self.terminal_judge_start < self.time_step: # Episode terminates if the progress of agent is small
-           if abs(progress) < self.termination_limit_progress:
-               if self.time_step >  20 :
+            if abs(progress) < self.termination_limit_progress:
                     reward -= 10
                     # print("--- No progress restart : reward: {},x:{},angle:{},trackPos:{}".format(reward,sp,obs['angle'],obs['trackPos']))
                     # print(self.time_step)
@@ -182,7 +189,7 @@ class TorcsEnv:
                     # client.R.d['meta'] = True
 
         if np.cos(obs['angle']) < 0:  # Episode is terminated if the agent runs backward
-            if self.time_step >  20 :
+            if self.time_step > 20 :
                 reward -= 10
                 # print("--- backward restart : reward: {},x:{},angle:{},trackPos:{}".format( reward, sp, obs['angle'], obs['trackPos']))
                 # print(self.time_step)

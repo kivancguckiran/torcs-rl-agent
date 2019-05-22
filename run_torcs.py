@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser(description="Pytorch RL algorithms")
 parser.add_argument(
     "--seed", type=int, default=777, help="random seed for reproducibility")
 parser.add_argument(
-    "--algo", type=str, default="sac", help="choose an algorithm")
+    "--algo", type=str, default="sac2", help="choose an algorithm")
 parser.add_argument(
     "--test", dest="test", action="store_true", help="test mode (no training)")
 parser.add_argument(
@@ -40,7 +40,7 @@ parser.add_argument(
 parser.add_argument(
     "--num-stack", type=int, default=1, help="number of states to stack")
 parser.add_argument(
-    "--reward-type", type=str, default="extra", help="reward type")
+    "--reward-type", type=str, default="extra_github", help="reward type")
 
 parser.set_defaults(test=False)
 parser.set_defaults(load_from=None)

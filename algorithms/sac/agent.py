@@ -138,10 +138,11 @@ class SACAgent(Agent):
 
         if not self.args.test:
             # if the last state is not a terminal state, store done as false
-            done_bool = (
-                False if self.episode_step == self.args.max_episode_steps else done
-            )
-            transition = (self.curr_state, action, reward, next_state, done_bool)
+            # done_bool = (
+            #     False if self.episode_step == self.args.max_episode_steps else done
+            # )
+            # transition = (self.curr_state, action, reward, next_state, done_bool)
+            transition = (self.curr_state, action, reward, next_state, False)
             self._add_transition_to_memory(transition)
 
         return next_state, reward, done
@@ -351,14 +352,27 @@ class SACAgent(Agent):
         for self.i_episode in range(1, self.args.episode_num + 1):
             is_relaunch = (self.i_episode - 1) % self.args.relaunch_period == 0
             state = self.env.reset(relaunch=is_relaunch, render=False, sampletrack=True)
+
             done = False
             score = 0
             self.episode_step = 0
             loss_episode = list()
             speed = list()
 
+            if self.hyper_params["USE_LSTM"]:
+                self.actor.reset_lstm_state()
+                self.vf.reset_lstm_state()
+                self.vf_target.reset_lstm_state()
+                self.qf_1.reset_lstm_state()
+                self.qf_2.reset_lstm_state()
+
             while not done:
                 action = self.select_action(state)
+
+                if self.total_step < self.hyper_params["TRY_BREAK"]:
+                    if np.random.random() < 0.1:
+                        action = self.env.try_break(action)
+
                 next_state, reward, done = self.step(action)
                 self.total_step += 1
                 self.episode_step += 1
