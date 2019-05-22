@@ -11,8 +11,8 @@ BRAKE = 2
 
 
 class DefaultEnv(TorcsEnv):
-    def __init__(self, port=3101, nstack=1, reward_type='no_trackpos'):
-        super().__init__(port, path='/usr/local/share/games/torcs/config/raceman/quickrace.xml', reward_type=reward_type)
+    def __init__(self, port=3101, nstack=1, reward_type='no_trackpos', track='none'):
+        super().__init__(port, path='/usr/local/share/games/torcs/config/raceman/quickrace.xml', reward_type=reward_type, track=track)
         self.nstack = nstack
         self.stack_buffer = deque(maxlen=nstack)
 
@@ -45,8 +45,8 @@ class DefaultEnv(TorcsEnv):
 
 
 class NoBrakeNoBackwardsEnv(DefaultEnv):
-    def __init__(self, port=3101, nstack=1, reward_type='no_trackpos'):
-        super().__init__(port, nstack, reward_type)
+    def __init__(self, port=3101, nstack=1, reward_type='no_trackpos', track='none'):
+        super().__init__(port, nstack, reward_type, track)
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,))
 
     def step(self, u):
@@ -71,8 +71,8 @@ class NoBackwardsEnv(DefaultEnv):
 
 
 class BitsPiecesEnv(DefaultEnv):
-    def __init__(self, port=3101, nstack=1, reward_type='no_trackpos'):
-        super().__init__(port, nstack, reward_type)
+    def __init__(self, port=3101, nstack=1, reward_type='no_trackpos', track='none'):
+        super().__init__(port, nstack, reward_type, track)
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,))
 
     def step(self, u):
@@ -91,8 +91,8 @@ class BitsPiecesEnv(DefaultEnv):
 
 
 class BitsPiecesContEnv(DefaultEnv):
-    def __init__(self, port=3101, nstack=1, reward_type='no_trackpos'):
-        super().__init__(port, nstack, reward_type)
+    def __init__(self, port=3101, nstack=1, reward_type='no_trackpos', track='none'):
+        super().__init__(port, nstack, reward_type, track)
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,))
 
     def step(self, u):
@@ -115,8 +115,8 @@ class BitsPiecesContEnv(DefaultEnv):
 
 
 class DiscretizedEnv(DefaultEnv):
-    def __init__(self, port=3101, nstack=1, reward_type='no_trackpos', action_count=21):
-        super().__init__(port, nstack, reward_type)
+    def __init__(self, port=3101, nstack=1, reward_type='no_trackpos', track='none', action_count=21):
+        super().__init__(port, nstack, reward_type, track)
 
         assert (action_count + 3) % 6 == 0
 
@@ -137,25 +137,25 @@ class DiscretizedEnv(DefaultEnv):
 
 
 class DiscretizedInriaEnv(DefaultEnv):
-    def __init__(self, port=3101, nstack=1, reward_type='no_trackpos',
+    def __init__(self, port=3101, nstack=1, reward_type='no_trackpos', track='none',
                  steer_count=9, accel_count=3, steer_brake_count=5):
-        super().__init__(port, nstack, reward_type)
+        super().__init__(port, nstack, reward_type, track)
 
         assert steer_count % 2 == 1
         assert accel_count > 1
         assert steer_brake_count % 2 == 1
 
-        n_steer_accel = steer_count * accel_count
+        self.n_steer_accel = steer_count * accel_count
         self.action_space = spaces.Discrete(steer_count * accel_count + steer_brake_count)
 
         self.accel_actions = np.zeros(self.action_space.n)
         self.steer_actions = np.zeros(self.action_space.n)
         self.brake_actions = np.zeros(self.action_space.n)
 
-        self.accel_actions[:n_steer_accel] = np.tile(np.linspace(0, 1, accel_count), steer_count)
-        self.steer_actions[:n_steer_accel] = np.repeat(np.linspace(-1, 1, steer_count), accel_count)
-        self.steer_actions[n_steer_accel:] = np.linspace(-1, 1, steer_brake_count)
-        self.brake_actions[n_steer_accel:] = np.ones(steer_brake_count)
+        self.accel_actions[:self.n_steer_accel] = np.tile(np.linspace(0, 1, accel_count), steer_count)
+        self.steer_actions[:self.n_steer_accel] = np.repeat(np.linspace(-1, 1, steer_count), accel_count)
+        self.steer_actions[self.n_steer_accel:] = np.linspace(-1, 1, steer_brake_count)
+        self.brake_actions[self.n_steer_accel:] = np.ones(steer_brake_count)
 
     def step(self, u):
         env_u = np.zeros(3)
@@ -166,10 +166,13 @@ class DiscretizedInriaEnv(DefaultEnv):
 
         return super().step(env_u)
 
+    def try_break(self, u):
+        return np.random.randint(self.n_steer_accel, self.action_space.n)
+
 
 class DiscretizedOldEnv(DefaultEnv):
-    def __init__(self, port=3101, nstack=1, reward_type='no_trackpos'):
-        super().__init__(port, nstack, reward_type)
+    def __init__(self, port=3101, nstack=1, reward_type='no_trackpos', track='none'):
+        super().__init__(port, nstack, reward_type, track)
         self.action_space = spaces.Discrete(9)
 
     def step(self, u):
