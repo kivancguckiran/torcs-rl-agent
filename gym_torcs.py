@@ -42,7 +42,7 @@ class TorcsEnv:
         reset: send a message to reset the game.
 
     """
-    terminal_judge_start = 1000  # Speed limit is applied after this step
+    terminal_judge_start = 250  # Speed limit is applied after this step
     termination_limit_progress = 5/200  # [km/h], episode terminates if car is running slower than this limit
 
     initial_reset = True
