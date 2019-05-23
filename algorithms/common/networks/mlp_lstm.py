@@ -46,18 +46,7 @@ def init_layer_xavier(layer: nn.Linear, init_w: float = 3e-3) -> nn.Linear:
     return layer
 
 
-class LSTMStateHandler:
-    """Includes methods to handle LSTM states."""
-    def __init__(self):
-        self.hx = None
-        self.cx = None
-
-    def reset_lstm_state(self):
-        self.hx = torch.zeros(1, self.lstm_layer.input_size).to(device)
-        self.cx = torch.zeros(1, self.lstm_layer.input_size).to(device)
-
-
-class MLP(nn.Module, LSTMStateHandler):
+class MLP(nn.Module):
     """Baseline of Multilayer perceptron with LSTM output.
 
     Attributes:
@@ -119,10 +108,8 @@ class MLP(nn.Module, LSTMStateHandler):
             self.__setattr__("hidden_fc{}".format(i), fc)
             self.hidden_layers.append(fc)
 
+        self.lstm_size = in_size
         self.lstm_layer = nn.LSTM(in_size, in_size)
-
-        # self.hx, self.cx = None, None
-        self.reset_lstm_state()
 
         # set output layers
         if self.use_output_layer:
@@ -132,27 +119,36 @@ class MLP(nn.Module, LSTMStateHandler):
             self.output_layer = identity
             self.output_activation = identity
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def init_lstm_states(self, batch_size):
+        hx = torch.zeros(1, batch_size, self.lstm_size).float().to(device)
+        cx = torch.zeros(1, batch_size, self.lstm_size).float().to(device)
+
+        return hx, cx
+
+    def forward(self, x: torch.Tensor, batch_size, step_size, hx, cx) -> torch.Tensor:
         """Forward method implementation."""
         for hidden_layer in self.hidden_layers:
             x = self.hidden_activation(hidden_layer(x))
 
-        self.hx, self.cx = self.lstm_layer(x, (self.hx, self.cx))
-        x = self.hx
+        x = x.view(step_size, batch_size, self.lstm_size)
+        x, (hx, cx) = self.lstm_layer(x, (hx, cx))
+
+        x = x.view(batch_size, step_size, -1)
 
         x = self.output_activation(self.output_layer(x))
 
-        return x
+        return x, hx, cx
 
 
 class FlattenMLP(MLP):
     """Baseline of Multilayered perceptron for Flatten input."""
 
-    def forward(self, *args: torch.Tensor) -> torch.Tensor:
+    def forward(self, states, actions, batch_size, step_size, hx, cx) -> torch.Tensor:
         """Forward method implementation."""
-        states, actions = args
+        states = states.view(batch_size, step_size, -1)
+        actions = actions.view(batch_size, step_size, -1)
         flat_inputs = concat(states, actions, self.n_category)
-        return super(FlattenMLP, self).forward(flat_inputs)
+        return super(FlattenMLP, self).forward(flat_inputs, batch_size, step_size, hx, cx)
 
 
 class GaussianDist(MLP):
@@ -199,9 +195,9 @@ class GaussianDist(MLP):
         self.mu_layer = nn.Linear(in_size, output_size)
         self.mu_layer = init_fn(self.mu_layer)
 
-    def get_dist_params(self, x: torch.Tensor) -> Tuple[torch.Tensor, ...]:
+    def get_dist_params(self, x: torch.Tensor, batch_size, step_size, hx, cx) -> Tuple[torch.Tensor, ...]:
         """Return gausian distribution parameters."""
-        hidden = super(GaussianDist, self).forward(x)
+        hidden, hx, cx = super(GaussianDist, self).forward(x, batch_size, step_size, hx, cx)
 
         # get mean
         mu = self.mu_activation(self.mu_layer(hidden))
@@ -213,17 +209,17 @@ class GaussianDist(MLP):
         )
         std = torch.exp(log_std)
 
-        return mu, log_std, std
+        return mu, log_std, std, hx, cx
 
-    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, ...]:
+    def forward(self, x: torch.Tensor, batch_size, step_size, hx, cx) -> Tuple[torch.Tensor, ...]:
         """Forward method implementation."""
-        mu, _, std = self.get_dist_params(x)
+        mu, _, std, hx, cx = self.get_dist_params(x, batch_size, step_size, hx, cx)
 
         # get normal distribution and action
         dist = Normal(mu, std)
         action = dist.sample()
 
-        return action, dist
+        return action, dist, hx, cx
 
 
 class TanhGaussianDistParams(GaussianDist):
@@ -233,11 +229,9 @@ class TanhGaussianDistParams(GaussianDist):
         """Initialization."""
         super(TanhGaussianDistParams, self).__init__(**kwargs, mu_activation=identity)
 
-    def forward(
-        self, x: torch.Tensor, epsilon: float = 1e-6
-    ) -> Tuple[torch.Tensor, ...]:
+    def forward(self, x: torch.Tensor, batch_size, step_size, hx, cx, epsilon: float = 1e-6) -> Tuple[torch.Tensor, ...]:
         """Forward method implementation."""
-        mu, _, std = super(TanhGaussianDistParams, self).get_dist_params(x)
+        mu, _, std, hx, cx = super(TanhGaussianDistParams, self).get_dist_params(x, batch_size, step_size, hx, cx)
 
         # sampling actions
         dist = Normal(mu, std)
@@ -249,67 +243,5 @@ class TanhGaussianDistParams(GaussianDist):
         log_prob = dist.log_prob(z) - torch.log(1 - action.pow(2) + epsilon)
         log_prob = log_prob.sum(-1, keepdim=True)
 
-        return action, log_prob, z, mu, std
+        return action, log_prob, z, mu, std, hx, cx
 
-
-class CategoricalDist(MLP):
-    """Multilayer perceptron with categorial distribution output.
-
-    Attributes:
-        last_layer (nn.Linear): output layer for softmax
-    """
-
-    def __init__(
-        self,
-        input_size: int,
-        output_size: int,
-        hidden_sizes: list,
-        hidden_activation: Callable = F.relu,
-        init_fn: Callable = init_layer_xavier,
-    ):
-        """Initialization."""
-        super(CategoricalDist, self).__init__(
-            input_size=input_size,
-            output_size=output_size,
-            hidden_sizes=hidden_sizes,
-            hidden_activation=hidden_activation,
-            use_output_layer=False,
-        )
-
-        in_size = hidden_sizes[-1]
-
-        # set log_std layer
-        self.last_layer = nn.Linear(in_size, output_size)
-        self.last_layer = init_fn(self.last_layer)
-
-    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, ...]:
-        """Forward method implementation."""
-        hidden = super(CategoricalDist, self).forward(x)
-        action_probs = F.softmax(self.last_layer(hidden), dim=-1)
-
-        dist = Categorical(action_probs)
-        selected_action = dist.sample()
-
-        return selected_action, dist
-
-
-class CategoricalDistParams(CategoricalDist):
-    """Multilayer perceptron with Categorical distribution output."""
-
-    def __init__(self, compatible_with_tanh_normal=False, **kwargs):
-        """Initialization."""
-        super(CategoricalDistParams, self).__init__(**kwargs)
-
-        self.compatible_with_tanh_normal = compatible_with_tanh_normal
-
-    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, ...]:
-        """Forward method implementation."""
-        action, dist = super(CategoricalDistParams, self).forward(x)
-        log_prob = dist.log_prob(action).sum(dim=-1, keepdim=True)
-
-        if self.compatible_with_tanh_normal:
-            # in order to prevent from using the unavailable return values
-            nan = float("nan")
-            return action, log_prob, nan, nan, nan
-        else:
-            return action, log_prob

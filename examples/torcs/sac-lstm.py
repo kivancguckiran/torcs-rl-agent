@@ -31,19 +31,17 @@ hyper_params = {
     "LR_QF2": 3e-4,
     "LR_ENTROPY": 3e-4,
     "POLICY_UPDATE_FREQ": 2,
-    # "BATCH_SIZE": 2,
-    "BATCH_SIZE": 16,
+    "BATCH_SIZE": 32,
     "EPISODE_SIZE": int(1e3),
-    "STEP_SIZE": int(32),
+    "STEP_SIZE": int(16),
     "AUTO_ENTROPY_TUNING": True,
     "WEIGHT_DECAY": 0.0,
-    # "INITIAL_RANDOM_ACTION": int(1e4),
-    "INITIAL_RANDOM_ACTION": int(10),
+    "INITIAL_RANDOM_ACTION": int(1e4),
     "MULTIPLE_LEARN": 1,
     "BRAKE_REGION": int(2e5),
     "BRAKE_DIST_MU": int(1e5),
     "BRAKE_DIST_SIGMA": int(2.5e4),
-    "BRAKE_FACTOR": 1e-1
+    "BRAKE_FACTOR": 1e-1,
 }
 
 
@@ -66,24 +64,34 @@ def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int)
 
     # create actor
     actor = TanhGaussianDistParams(
-        input_size=state_dim, output_size=action_dim, hidden_sizes=hidden_sizes_actor
+        input_size=state_dim,
+        output_size=action_dim,
+        hidden_sizes=hidden_sizes_actor,
     ).to(device)
 
     # create v_critic
-    vf = MLP(input_size=state_dim, output_size=1, hidden_sizes=hidden_sizes_vf).to(
-        device
-    )
+    vf = MLP(
+        input_size=state_dim,
+        output_size=1,
+        hidden_sizes=hidden_sizes_vf,
+    ).to(device)
     vf_target = MLP(
-        input_size=state_dim, output_size=1, hidden_sizes=hidden_sizes_vf
+        input_size=state_dim,
+        output_size=1,
+        hidden_sizes=hidden_sizes_vf,
     ).to(device)
     vf_target.load_state_dict(vf.state_dict())
 
     # create q_critic
     qf_1 = FlattenMLP(
-        input_size=state_dim + action_dim, output_size=1, hidden_sizes=hidden_sizes_qf
+        input_size=state_dim + action_dim,
+        output_size=1,
+        hidden_sizes=hidden_sizes_qf,
     ).to(device)
     qf_2 = FlattenMLP(
-        input_size=state_dim + action_dim, output_size=1, hidden_sizes=hidden_sizes_qf
+        input_size=state_dim + action_dim,
+        output_size=1,
+        hidden_sizes=hidden_sizes_qf,
     ).to(device)
 
     # create optimizers
