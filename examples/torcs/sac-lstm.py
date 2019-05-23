@@ -40,7 +40,7 @@ hyper_params = {
     "MULTIPLE_LEARN": 1,
     "BRAKE_REGION": int(2e5),
     "BRAKE_DIST_MU": int(1e5),
-    "BRAKE_DIST_SIGMA": int(2.5e4),
+    "BRAKE_DIST_SIGMA": int(3e4),
     "BRAKE_FACTOR": 1e-1,
 }
 
