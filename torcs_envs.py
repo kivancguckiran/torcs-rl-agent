@@ -19,7 +19,7 @@ class DefaultEnv(TorcsEnv):
         self.stack_buffer = deque(maxlen=nstack)
         self.filter = filter
         if filter is not None:
-            self.filter = np.tile(np.array(filter).reshape(-1, 1), self.state_dim)
+            self.filter = np.tile(np.array(filter).reshape(-1, 1), self.observation_space.shape[0])
             self.filter_size = self.filter.shape[0]
             self.filter_buffer = deque(maxlen=self.filter_size)
 
@@ -45,6 +45,8 @@ class DefaultEnv(TorcsEnv):
 
         if self.filter is not None:
             self.filter_buffer.append(next_state)
+            while len(self.filter_buffer) < self.filter_size:
+                self.filter_buffer.append(next_state)
             prev_state = np.array(self.filter_buffer)
             next_state = np.sum(np.multiply(prev_state, self.filter), axis=0) / self.filter_size
 
