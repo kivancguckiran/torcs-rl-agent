@@ -25,7 +25,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # hyper parameters
 hyper_params = {
     "N_STEP": 5,
-    "GAMMA": 0.99,
+    "GAMMA": 0.95,
     "TAU": 5e-3,
     "W_N_STEP": 1.0,
     "W_Q_REG": 1e-7,
@@ -55,7 +55,7 @@ hyper_params = {
     # Others
     "USE_LSTM": False,
     "BRAKE_ENABLE": False,
-    "BRAKE_REGION": int(5e4),
+    "BRAKE_REGION": int(1e5),
     "BRAKE_FACTOR": 0.05
 }
 
@@ -71,10 +71,10 @@ def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int)
 
     """
 
-    if args.load_from is not None:
-        hyper_params["GAMMA"]: 0.9
-        hyper_params["BRAKE_ENABLE"]: True
-        hyper_params["UPDATE_STARTS_FROM"]: int(2e4)
+    # if args.load_from is not None:
+    #     hyper_params["GAMMA"]: 0.9
+    #     hyper_params["BRAKE_ENABLE"]: True
+    #     hyper_params["UPDATE_STARTS_FROM"]: int(2e4)
 
     # create model
     def get_fc_model():

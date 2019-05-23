@@ -55,7 +55,7 @@ args = parser.parse_args()
 
 
 def main():
-    filter = None if not args.filter else [1., 1., 1.]  # example filter (recent to previous)
+    filter = None if not args.filter else [1., 1.]  # example filter (recent to previous)
 
     if args.algo == "dqn":
         env = torcs.DiscretizedOldEnv(nstack=args.num_stack,

@@ -19,7 +19,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # hyper parameters
 hyper_params = {
-    "GAMMA": 0.99,
+    "GAMMA": 0.95,
     "TAU": 5e-3,
     "W_ENTROPY": 1e-3,
     "W_MEAN_REG": 0.0,
@@ -40,7 +40,7 @@ hyper_params = {
     "BRAKE_ENABLE": True,
     "BRAKE_REGION": int(2e5),
     "BRAKE_DIST_MU": int(1e5),
-    "BRAKE_DIST_SIGMA": int(2.5e4),
+    "BRAKE_DIST_SIGMA": int(3e4),
     "BRAKE_FACTOR": 1e-1
 }
 
