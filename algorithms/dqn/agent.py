@@ -353,9 +353,10 @@ class DQNAgent(Agent):
             while not done:
                 action = self.select_action(state)
 
-                if "TRY_BRAKE" in self.hyper_params and self.total_step < self.hyper_params["TRY_BRAKE"]:
-                    if np.random.random() < 0.1:
-                        action = self.env.try_brake(action)
+                if "BRAKE_ENABLE" in self.hyper_params and self.hyper_params["BRAKE_ENABLE"]:
+                    if "BRAKE_REGION" in self.hyper_params and self.total_step < self.hyper_params["BRAKE_REGION"]:
+                        if np.random.random() < self.hyper_params["BRAKE_FACTOR"]:
+                            action = self.env.try_brake(action)
 
                 next_state, reward, done = self.step(action)
                 self.total_step += 1

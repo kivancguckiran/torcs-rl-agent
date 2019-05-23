@@ -43,25 +43,44 @@ parser.add_argument(
     "--reward-type", type=str, default="extra_github", help="reward type")
 parser.add_argument(
     "--track", type=str, default="none", help="track name")
+parser.add_argument(
+    "--use-filter", dest="filter", action="store_true", help="apply filter to observations")
 
 parser.set_defaults(test=False)
 parser.set_defaults(load_from=None)
 parser.set_defaults(render=False)
 parser.set_defaults(log=True)
+parser.set_defaults(filter=False)
 args = parser.parse_args()
 
 
 def main():
+    filter = None if not args.filter else [1., 1., 1.]  # example filter (recent to previous)
+
     if args.algo == "dqn":
-        env = torcs.DiscretizedOldEnv(nstack=args.num_stack, reward_type=args.reward_type, track=args.track)
+        env = torcs.DiscretizedOldEnv(nstack=args.num_stack,
+                                      reward_type=args.reward_type,
+                                      track=args.track,
+                                      filter=filter)
     elif args.algo == "dqn2":
-        env = torcs.DiscretizedEnv(nstack=args.num_stack, reward_type=args.reward_type, track=args.track,
+        env = torcs.DiscretizedEnv(nstack=args.num_stack,
+                                   reward_type=args.reward_type,
+                                   track=args.track,
+                                   filter=filter,
                                    action_count=21)
     elif args.algo.startswith("dqn") or args.algo == "sac-discrete":
-        env = torcs.DiscretizedInriaEnv(nstack=args.num_stack, reward_type=args.reward_type, track=args.track,
-                                        steer_count=9, accel_count=3, steer_brake_count=5)
+        env = torcs.DiscretizedInriaEnv(nstack=args.num_stack,
+                                        reward_type=args.reward_type,
+                                        track=args.track,
+                                        filter=filter,
+                                        steer_count=9,
+                                        accel_count=3,
+                                        steer_brake_count=5)
     else:
-        env = torcs.BitsPiecesContEnv(nstack=args.num_stack, reward_type=args.reward_type, track=args.track)
+        env = torcs.BitsPiecesContEnv(nstack=args.num_stack,
+                                      reward_type=args.reward_type,
+                                      track=args.track,
+                                      filter=filter)
 
     # run
     module_path = "examples.torcs." + args.algo
