@@ -54,8 +54,8 @@ hyper_params = {
     "STD_INIT": 0.5,
     # Others
     "USE_LSTM": False,
-    "BRAKE_ENABLE": True,
-    "BRAKE_REGION": int(1e5),
+    "BRAKE_ENABLE": False,
+    "BRAKE_REGION": int(5e4),
     "BRAKE_FACTOR": 0.05
 }
 
@@ -70,6 +70,12 @@ def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int)
         action_dim (int): dimension of actions
 
     """
+
+    if args.load_from is not None:
+        hyper_params["GAMMA"]: 0.9
+        hyper_params["BRAKE_ENABLE"]: True
+        hyper_params["UPDATE_STARTS_FROM"]: int(2e4)
+
     # create model
     def get_fc_model():
         hidden_sizes = [256, 256, 256]
