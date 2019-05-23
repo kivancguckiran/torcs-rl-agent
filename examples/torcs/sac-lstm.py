@@ -12,8 +12,8 @@ import numpy as np
 import torch
 import torch.optim as optim
 
-from algorithms.common.networks.mlp import MLP, FlattenMLP, TanhGaussianDistParams
-from algorithms.sac.agent import SACAgent
+from algorithms.common.networks.mlp_lstm import MLP, FlattenMLP, TanhGaussianDistParams
+from algorithms.sac.agent import SACAgentLSTM
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -31,11 +31,14 @@ hyper_params = {
     "LR_QF2": 3e-4,
     "LR_ENTROPY": 3e-4,
     "POLICY_UPDATE_FREQ": 2,
-    "BUFFER_SIZE": int(1e6),
-    "BATCH_SIZE": 128,
+    # "BATCH_SIZE": 2,
+    "BATCH_SIZE": 16,
+    "EPISODE_SIZE": int(1e3),
+    "STEP_SIZE": int(32),
     "AUTO_ENTROPY_TUNING": True,
     "WEIGHT_DECAY": 0.0,
-    "INITIAL_RANDOM_ACTION": int(1e4),
+    # "INITIAL_RANDOM_ACTION": int(1e4),
+    "INITIAL_RANDOM_ACTION": int(10),
     "MULTIPLE_LEARN": 1,
     "BRAKE_REGION": int(2e5),
     "BRAKE_DIST_MU": int(1e5),
@@ -110,7 +113,7 @@ def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int)
     optims = (actor_optim, vf_optim, qf_1_optim, qf_2_optim)
 
     # create an agent
-    agent = SACAgent(env, args, hyper_params, models, optims, target_entropy)
+    agent = SACAgentLSTM(env, args, hyper_params, models, optims, target_entropy)
 
     # run
     if args.test:

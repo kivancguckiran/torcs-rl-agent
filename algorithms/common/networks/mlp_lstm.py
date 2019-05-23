@@ -48,10 +48,13 @@ def init_layer_xavier(layer: nn.Linear, init_w: float = 3e-3) -> nn.Linear:
 
 class LSTMStateHandler:
     """Includes methods to handle LSTM states."""
+    def __init__(self):
+        self.hx = None
+        self.cx = None
 
     def reset_lstm_state(self):
-        self.hx = torch.zeros(1, self.lstm.input_size).to(device)
-        self.cx = torch.zeros(1, self.lstm.input_size).to(device)
+        self.hx = torch.zeros(1, self.lstm_layer.input_size).to(device)
+        self.cx = torch.zeros(1, self.lstm_layer.input_size).to(device)
 
 
 class MLP(nn.Module, LSTMStateHandler):
@@ -116,11 +119,9 @@ class MLP(nn.Module, LSTMStateHandler):
             self.__setattr__("hidden_fc{}".format(i), fc)
             self.hidden_layers.append(fc)
 
-        self.lstm = nn.LSTMCell(in_size, in_size)
-        self.lstm.bias_ih.data.fill_(0)
-        self.lstm.bias_hh.data.fill_(0)
+        self.lstm_layer = nn.LSTM(in_size, in_size)
 
-        self.hx, self.cx = None, None
+        # self.hx, self.cx = None, None
         self.reset_lstm_state()
 
         # set output layers
@@ -136,8 +137,7 @@ class MLP(nn.Module, LSTMStateHandler):
         for hidden_layer in self.hidden_layers:
             x = self.hidden_activation(hidden_layer(x))
 
-        x = torch.cat(x).view(len(x), 1, -1)
-        self.hx, self.cx = self.lstm(x, (self.hx, self.cx))
+        self.hx, self.cx = self.lstm_layer(x, (self.hx, self.cx))
         x = self.hx
 
         x = self.output_activation(self.output_layer(x))

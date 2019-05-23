@@ -181,3 +181,94 @@ class NStepTransitionBuffer:
             dones_ = dones_.cuda(non_blocking=True)
 
         return states_, actions_, rewards_, next_states_, dones_
+
+
+class EpisodeBuffer():
+    """Fixed-size buffer to store experience tuples.
+
+    Taken from Udacity deep-reinforcement-learning github repository:
+    https://github.com/udacity/deep-reinforcement-learning/blob/master/
+    ddpg-pendulum/ddpg_agent.py
+
+    Attributes:
+        buffer (list): list of replay buffer
+        batch_size (int): size of a batched sampled from replay buffer for training
+
+    """
+
+    def __init__(self, episode_size: int, batch_size: int, step_size: int):
+        """Initialize a ReplayBuffer object.
+
+        Args:
+            buffer_size (int): size of replay buffer for experience
+            batch_size (int): size of a batched sampled from replay buffer for training
+
+        """
+        self.episode_size = episode_size
+        self.batch_size = batch_size
+        self.step_size = step_size
+        self.current_episode = list()
+        self.episodes = list()
+        self.idx = 0
+
+    def add(
+        self,
+        state: np.ndarray,
+        action: np.ndarray,
+        reward: np.float64,
+        next_state: np.ndarray,
+        done: float,
+    ):
+        """Add a new experience to memory."""
+        data = (state, action, reward, next_state, done)
+
+        self.current_episode.append(data)
+
+        if done:
+            if len(self.current_episode) > self.step_size:
+                self.episodes.append(self.current_episode)
+
+                if len(self.episodes) == self.episode_size:
+                    self.episodes.pop(0)
+
+            self.current_episode = list()
+
+    def sample(self) -> Tuple[torch.Tensor, ...]:
+        """Randomly sample a batch of experiences from memory."""
+        assert len(self.episodes) >= self.batch_size
+
+        states, actions, rewards, next_states, dones = [], [], [], [], []
+
+        episodes = np.random.choice(self.episodes, size=self.batch_size, replace=False)
+
+        for episode in episodes:
+            point = np.random.randint(0, len(episode) + 1 - self.step_size)
+            batch = episode[point:point + self.step_size]
+
+            for transition in batch:
+                state, action, reward, next_state, done = transition
+
+                states.append(state)
+                actions.append(action)
+                rewards.append(reward)
+                next_states.append(next_state)
+                dones.append(done)
+
+        states_ = torch.FloatTensor(np.array(states)).to(device)
+        actions_ = torch.FloatTensor(np.array(actions)).to(device)
+        rewards_ = torch.FloatTensor(np.array(rewards).reshape(-1, 1)).to(device)
+        next_states_ = torch.FloatTensor(np.array(next_states)).to(device)
+        dones_ = torch.FloatTensor(np.array(dones).reshape(-1, 1)).to(device)
+
+        if torch.cuda.is_available():
+            states_ = states_.cuda(non_blocking=True)
+            actions_ = actions_.cuda(non_blocking=True)
+            rewards_ = rewards_.cuda(non_blocking=True)
+            next_states_ = next_states_.cuda(non_blocking=True)
+            dones_ = dones_.cuda(non_blocking=True)
+
+        return states_, actions_, rewards_, next_states_, dones_
+
+    def __len__(self) -> int:
+        """Return the current size of internal memory."""
+        return len(self.episodes)
