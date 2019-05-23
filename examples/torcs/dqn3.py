@@ -54,6 +54,9 @@ hyper_params = {
     "STD_INIT": 0.5,
     # Others
     "USE_LSTM": False,
+    "BRAKE_ENABLE": True,
+    "BRAKE_REGION": int(1e5),
+    "BRAKE_FACTOR": 0.05
 }
 
 

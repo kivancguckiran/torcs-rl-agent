@@ -369,9 +369,10 @@ class SACAgent(Agent):
             while not done:
                 action = self.select_action(state)
 
-                if "BRAKE_REGION" in self.hyper_params and self.total_step < self.hyper_params["BRAKE_REGION"]:
-                    if np.random.random() < self.brakes[self.i_episode] * self.hyper_params["BRAKE_FACTOR"]:
-                        action = self.env.try_brake(action)
+                if "BRAKE_ENABLE" in self.hyper_params and self.hyper_params["BRAKE_ENABLE"]:
+                    if "BRAKE_REGION" in self.hyper_params and self.total_step < self.hyper_params["BRAKE_REGION"]:
+                        if np.random.random() < self.brakes[self.i_episode] * self.hyper_params["BRAKE_FACTOR"]:
+                            action = self.env.try_brake(action)
 
                 next_state, reward, done = self.step(action)
                 self.total_step += 1
