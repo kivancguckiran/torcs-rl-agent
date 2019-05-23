@@ -18,7 +18,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 import wandb
 
-from algorithms.common.abstract.agent import Agent
+from algorithms.common.abstract.agent import Agent, AgentLSTM
 from algorithms.common.buffer.replay_buffer import ReplayBuffer, EpisodeBuffer
 import algorithms.common.helper_functions as common_utils
 
@@ -411,7 +411,7 @@ class SACAgent(Agent):
         self.interim_test()
 
 
-class SACAgentLSTM(Agent):
+class SACAgentLSTM(AgentLSTM):
     """SAC agent interacting with environment.
 
     Attrtibutes:
