@@ -239,9 +239,10 @@ class EpisodeBuffer():
 
         states, actions, rewards, next_states, dones = [], [], [], [], []
 
-        episodes = np.random.choice(self.episodes, size=self.batch_size, replace=False)
+        indices = np.random.choice(len(self.episodes), size=self.batch_size, replace=False)
 
-        for episode in episodes:
+        for i in indices:
+            episode = self.episodes[i]
             point = np.random.randint(0, len(episode) + 1 - self.step_size)
             batch = episode[point:point + self.step_size]
 
