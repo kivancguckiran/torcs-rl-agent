@@ -168,7 +168,13 @@ class TorcsEnv:
                         - np.abs(1.0 * speedX * np.sin(obs['angle'])) \
                         - 2 * speedX * np.abs(obs['trackPos'] * np.sin(obs['angle'])) \
                         - speedY * np.cos(obs['angle'])
-
+        elif self.reward_type == 'last_resort':
+            Vx = obs['speedX'] / 200
+            Vy = obs['speedY'] / 200
+            trackpos = np.abs(obs['trackPos'])
+            sintheta = np.abs(np.sin(obs['angle']))
+            costheta = np.cos(obs['angle'])
+            reward = Vx * costheta - Vx * sintheta - Vy * costheta
         elif self.reward_type == 'race_pos':
             reward = progress - np.abs(sp * np.sin(obs["angle"]))  # no trackpos
             if obs['racePos'] > obs_pre['racePos']:

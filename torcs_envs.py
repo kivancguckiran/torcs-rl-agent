@@ -130,6 +130,25 @@ class BitsPiecesContEnv(DefaultEnv):
         return u
 
 
+class BitsPiecesBrakeEnv(DefaultEnv):
+    def __init__(self, port=3101, nstack=1, reward_type='no_trackpos', track='none', filter=None):
+        super().__init__(port, nstack, reward_type, track, filter)
+        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,))
+
+    def step(self, u):
+        env_u = np.zeros(3)
+
+        env_u[ACCELERATE] = 1
+        env_u[STEER] = u[0]
+        env_u[BRAKE] = u[1]
+
+        return super().step(env_u)
+
+    def try_brake(self, u):
+        u[1] = torch.rand(1) - 1
+        return u
+
+
 class DiscretizedEnv(DefaultEnv):
     def __init__(self, port=3101, nstack=1, reward_type='no_trackpos', track='none', filter=None,
                  action_count=21):
