@@ -201,7 +201,7 @@ class TorcsEnv:
                 reward -= 10
                 # print("--- backward restart : reward: {},x:{},angle:{},trackPos:{}".format( reward, sp, obs['angle'], obs['trackPos']))
                 # print(self.time_step)
-                episode_terminate = True
+                # episode_terminate = True
                 info["moving back"] = True
                 # client.R.d['meta'] = True
 
