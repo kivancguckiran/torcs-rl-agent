@@ -72,6 +72,7 @@ class MLP(nn.Module):
         linear_layer: nn.Module = nn.Linear,
         use_output_layer: bool = True,
         n_category: int = -1,
+        lstm_layer_size = 1,
         init_fn: Callable = init_layer_xavier
     ):
         """Initialization.
@@ -108,8 +109,9 @@ class MLP(nn.Module):
             self.__setattr__("hidden_fc{}".format(i), fc)
             self.hidden_layers.append(fc)
 
+        self.lstm_layer_size = lstm_layer_size
         self.lstm_size = in_size
-        self.lstm_layer = nn.LSTM(in_size, in_size)
+        self.lstm_layer = nn.LSTM(in_size, in_size, self.lstm_layer_size)
 
         # set output layers
         if self.use_output_layer:
@@ -120,8 +122,8 @@ class MLP(nn.Module):
             self.output_activation = identity
 
     def init_lstm_states(self, batch_size):
-        hx = torch.zeros(1, batch_size, self.lstm_size).float().to(device)
-        cx = torch.zeros(1, batch_size, self.lstm_size).float().to(device)
+        hx = torch.zeros(self.lstm_layer_size, batch_size, self.lstm_size).float().to(device)
+        cx = torch.zeros(self.lstm_layer_size, batch_size, self.lstm_size).float().to(device)
 
         return hx, cx
 
@@ -171,6 +173,7 @@ class GaussianDist(MLP):
         mu_activation: Callable = torch.tanh,
         log_std_min: float = -20,
         log_std_max: float = 2,
+        lstm_layer_size = 1,
         init_fn: Callable = init_layer_xavier
     ):
         """Initialization."""
@@ -179,6 +182,7 @@ class GaussianDist(MLP):
             output_size=output_size,
             hidden_sizes=hidden_sizes,
             hidden_activation=hidden_activation,
+            lstm_layer_size=lstm_layer_size,
             use_output_layer=False
         )
 

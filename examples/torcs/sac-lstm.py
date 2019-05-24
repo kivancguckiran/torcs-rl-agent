@@ -58,6 +58,7 @@ def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int)
     hidden_sizes_actor = [512, 256, 128]
     hidden_sizes_vf = [512, 256, 128]
     hidden_sizes_qf = [512, 256, 128]
+    lstm_layer_size = 1
 
     # target entropy
     target_entropy = -np.prod((action_dim,)).item()  # heuristic
@@ -67,6 +68,7 @@ def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int)
         input_size=state_dim,
         output_size=action_dim,
         hidden_sizes=hidden_sizes_actor,
+        lstm_layer_size=lstm_layer_size,
     ).to(device)
 
     # create v_critic
@@ -74,11 +76,13 @@ def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int)
         input_size=state_dim,
         output_size=1,
         hidden_sizes=hidden_sizes_vf,
+        lstm_layer_size=lstm_layer_size,
     ).to(device)
     vf_target = MLP(
         input_size=state_dim,
         output_size=1,
         hidden_sizes=hidden_sizes_vf,
+        lstm_layer_size=lstm_layer_size,
     ).to(device)
     vf_target.load_state_dict(vf.state_dict())
 
@@ -87,11 +91,13 @@ def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int)
         input_size=state_dim + action_dim,
         output_size=1,
         hidden_sizes=hidden_sizes_qf,
+        lstm_layer_size=lstm_layer_size,
     ).to(device)
     qf_2 = FlattenMLP(
         input_size=state_dim + action_dim,
         output_size=1,
         hidden_sizes=hidden_sizes_qf,
+        lstm_layer_size=lstm_layer_size,
     ).to(device)
 
     # create optimizers
