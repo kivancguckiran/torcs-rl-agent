@@ -1,4 +1,6 @@
 import random
+import numpy as np
+
 
 TRACKS = [
     ("e-track-1", "road"),
@@ -67,4 +69,4 @@ def set_render_mode(root_node, render=True):
 
 
 def sigmoid(x):
-    return 1/(1+np.exp(-x))
+    return 1 / (1 + np.exp(-x))
