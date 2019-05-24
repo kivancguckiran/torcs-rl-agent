@@ -14,6 +14,8 @@ algo_column_list={
     "per-ddpg":per_ddpg_columns,
     "dqn": dqn_columns,
     "sac": sac_columns,
+    "SAC": sac_columns,
+    "SACLSTM": sac_columns,
     "t3d": t3d_columns
 }
 
@@ -145,8 +147,8 @@ if __name__ == "__main__":
 
     x_column="episode"
     y_column="total_score"
-    log_filenames=["logs\Torcs_sac_random.txt", "logs\Torcs_sac_f18c5ea.txt"]
-    #log_filenames = ["logs\Torcs_sac_f18c5ea.txt"]
-    plot_algos(log_filenames, x_column=x_column, y_column=y_column,smooth_factor=10)
+    # log_filenames=["releases/TORCS_SAC_N4_G99_2000.log"]
+    log_filenames=["releases/TORCS_SAC_N4_G99_2000.log", "releases/TORCS_SACLSTM_EP2000_N1_G99.log"]
+    plot_algos(log_filenames, x_column=x_column, y_column=y_column,smooth_factor=500)
 
 

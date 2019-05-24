@@ -11,6 +11,8 @@ import xml.etree.ElementTree as ET
 
 from utils import sample_track
 from utils import set_render_mode
+from utils import sigmoid
+
 
 class TorcsEnv:
     """
@@ -168,7 +170,19 @@ class TorcsEnv:
                         - np.abs(1.0 * speedX * np.sin(obs['angle'])) \
                         - 2 * speedX * np.abs(obs['trackPos'] * np.sin(obs['angle'])) \
                         - speedY * np.cos(obs['angle'])
-
+        elif self.reward_type == 'last_resort':
+            Vx = obs['speedX'] / 200
+            Vy = obs['speedY'] / 200
+            trackpos = np.abs(obs['trackPos'])
+            sintheta = np.abs(np.sin(obs['angle']))
+            costheta = np.cos(obs['angle'])
+            reward = Vx * costheta - Vx * sintheta - Vy * costheta
+        elif self.reward_type == 'sigmoid':
+            Vx = obs['speedX'] / 200
+            Vy = obs['speedY'] / 200
+            clipped_cos = sigmoid(np.cos(obs['angle']) * 3)
+            inverse_clipped_cos = (1 - clipped_cos) / 2
+            reward = Vx * clipped_cos - Vx * inverse_clipped_cos - Vy * clipped_cos
         elif self.reward_type == 'race_pos':
             reward = progress - np.abs(sp * np.sin(obs["angle"]))  # no trackpos
             if obs['racePos'] > obs_pre['racePos']:
@@ -195,7 +209,7 @@ class TorcsEnv:
                 reward -= 10
                 # print("--- backward restart : reward: {},x:{},angle:{},trackPos:{}".format( reward, sp, obs['angle'], obs['trackPos']))
                 # print(self.time_step)
-                episode_terminate = True
+                # episode_terminate = True
                 info["moving back"] = True
                 # client.R.d['meta'] = True
 

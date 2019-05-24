@@ -65,3 +65,6 @@ def set_render_mode(root_node, render=True):
     else:
         subnode.attrib["val"] = "results only"
 
+
+def sigmoid(x):
+    return 1/(1+np.exp(-x))
