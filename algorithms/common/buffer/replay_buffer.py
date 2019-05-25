@@ -183,27 +183,8 @@ class NStepTransitionBuffer:
         return states_, actions_, rewards_, next_states_, dones_
 
 
-class EpisodeBuffer():
-    """Fixed-size buffer to store experience tuples.
-
-    Taken from Udacity deep-reinforcement-learning github repository:
-    https://github.com/udacity/deep-reinforcement-learning/blob/master/
-    ddpg-pendulum/ddpg_agent.py
-
-    Attributes:
-        buffer (list): list of replay buffer
-        batch_size (int): size of a batched sampled from replay buffer for training
-
-    """
-
+class EpisodeBuffer:
     def __init__(self, episode_size: int, batch_size: int, step_size: int):
-        """Initialize a ReplayBuffer object.
-
-        Args:
-            buffer_size (int): size of replay buffer for experience
-            batch_size (int): size of a batched sampled from replay buffer for training
-
-        """
         self.episode_size = episode_size
         self.batch_size = batch_size
         self.step_size = step_size
@@ -219,7 +200,6 @@ class EpisodeBuffer():
         next_state: np.ndarray,
         done: float,
     ):
-        """Add a new experience to memory."""
         data = (state, action, reward, next_state, done)
 
         self.current_episode.append(data)
@@ -234,7 +214,6 @@ class EpisodeBuffer():
             self.current_episode = list()
 
     def sample(self) -> Tuple[torch.Tensor, ...]:
-        """Randomly sample a batch of experiences from memory."""
         assert len(self.episodes) >= self.batch_size
 
         states, actions, rewards, next_states, dones = [], [], [], [], []

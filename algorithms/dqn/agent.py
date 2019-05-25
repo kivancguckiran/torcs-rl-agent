@@ -29,6 +29,8 @@ from algorithms.common.buffer.replay_buffer import NStepTransitionBuffer
 import algorithms.common.helper_functions as common_utils
 import algorithms.dqn.utils as dqn_utils
 
+from env.torcs_envs import DefaultEnv
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
@@ -54,7 +56,7 @@ class DQNAgent(Agent):
 
     def __init__(
         self,
-        env: gym.Env,
+        env: DefaultEnv,
         args: argparse.Namespace,
         hyper_params: dict,
         models: tuple,
@@ -108,21 +110,20 @@ class DQNAgent(Agent):
                     gamma=self.hyper_params["GAMMA"],
                 )
 
-        brake_x = np.linspace(
-            0,
-            self.hyper_params["BRAKE_REGION"],
-            self.hyper_params["BRAKE_REGION"],
-        )
+            brake_x = np.linspace(
+                0,
+                self.hyper_params["BRAKE_REGION"],
+                self.hyper_params["BRAKE_REGION"],
+            )
 
-        self.brakes = np.exp(-np.power(brake_x - self.hyper_params["BRAKE_DIST_MU"], 2.) / (
-                    2 * np.power(self.hyper_params["BRAKE_DIST_SIGMA"], 2.)))
+            self.brakes = np.exp(-np.power(brake_x - self.hyper_params["BRAKE_DIST_MU"], 2.) / (
+                        2 * np.power(self.hyper_params["BRAKE_DIST_SIGMA"], 2.)))
 
     def select_action(self, state: np.ndarray) -> np.ndarray:
         """Select an action from the input space."""
         self.curr_state = state
 
         # epsilon greedy policy
-        # pylint: disable=comparison-with-callable
         if not self.args.test and self.epsilon > np.random.random():
             selected_action = self.env.action_space.sample()
         else:
@@ -168,18 +169,7 @@ class DQNAgent(Agent):
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """Return element-wise dqn loss and Q-values."""
 
-        if self.hyper_params["USE_DIST_Q"] == "IQN":
-            return dqn_utils.calculate_iqn_loss(
-                model=self.dqn,
-                target_model=self.dqn_target,
-                experiences=experiences,
-                gamma=gamma,
-                batch_size=self.hyper_params["BATCH_SIZE"],
-                n_tau_samples=self.hyper_params["N_TAU_SAMPLES"],
-                n_tau_prime_samples=self.hyper_params["N_TAU_PRIME_SAMPLES"],
-                kappa=self.hyper_params["KAPPA"],
-            )
-        elif self.hyper_params["USE_DIST_Q"] == "C51":
+        if self.hyper_params["USE_DIST_Q"] == "C51":
             return dqn_utils.calculate_c51_loss(
                 model=self.dqn,
                 target_model=self.dqn_target,
@@ -200,10 +190,6 @@ class DQNAgent(Agent):
 
     def update_model(self) -> Tuple[torch.Tensor, torch.Tensor]:
         """Train the model after each episode."""
-
-        if "USE_LSTM" in self.hyper_params and self.hyper_params["USE_LSTM"]:
-            self.dqn.reset_lstm_state()
-            self.dqn_target.reset_lstm_state()
 
         # 1 step loss
         experiences_1 = self.memory.sample(self.beta)

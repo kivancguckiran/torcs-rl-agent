@@ -21,6 +21,8 @@ from algorithms.common.abstract.agent import Agent, AgentLSTM
 from algorithms.common.buffer.replay_buffer import ReplayBuffer, EpisodeBuffer
 import algorithms.common.helper_functions as common_utils
 
+from env.torcs_envs import DefaultEnv
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
@@ -53,7 +55,7 @@ class SACAgent(Agent):
 
     def __init__(
         self,
-        env: gym.Env,
+        env: DefaultEnv,
         args: argparse.Namespace,
         hyper_params: dict,
         models: tuple,

@@ -17,6 +17,8 @@ from env.gym_torcs import TorcsEnv
 import numpy as np
 import torch
 
+from env.torcs_envs import DefaultEnv
+
 
 class Agent(ABC):
     """Abstract Agent used for all agents.
@@ -32,7 +34,7 @@ class Agent(ABC):
 
     """
 
-    def __init__(self, env: TorcsEnv, args: argparse.Namespace):
+    def __init__(self, env: DefaultEnv, args: argparse.Namespace):
         """Initialization.
 
         Args:
