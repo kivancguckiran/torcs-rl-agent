@@ -44,8 +44,9 @@ class TorcsEnv:
         reset: send a message to reset the game.
 
     """
-    terminal_judge_start = 250  # Speed limit is applied after this step
+    terminal_judge_start = 100  # Speed limit is applied after this step
     termination_limit_progress = 5/200  # [km/h], episode terminates if car is running slower than this limit
+    backward_counter = 0
 
     initial_reset = True
 
@@ -205,17 +206,23 @@ class TorcsEnv:
                     # client.R.d['meta'] = True
 
         if np.cos(obs['angle']) < 0:  # Episode is terminated if the agent runs backward
-            if self.time_step > 20 :
-                reward -= 10
+            if self.time_step > 20:
+                reward -= 1
                 # print("--- backward restart : reward: {},x:{},angle:{},trackPos:{}".format( reward, sp, obs['angle'], obs['trackPos']))
                 # print(self.time_step)
                 # episode_terminate = True
                 info["moving back"] = True
                 # client.R.d['meta'] = True
 
+            self.backward_counter += 1
+            if self.backward_counter >= 100:
+                episode_terminate = True
+        else:
+            self.backward_counter = 0
+
         info["place"] = int(obs["racePos"])
         if episode_terminate is True: # Send a reset signal
-            reward += (obs["racePos"] == 1)*20 # If terminated and first place
+            # reward += (8 - obs["racePos"]) * 20 # If terminated and first place
             self.initial_run = False
             # client.respond_to_server()
 
