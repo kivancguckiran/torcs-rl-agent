@@ -285,14 +285,15 @@ class TorcsEnv:
             self.tree.write(self.path)
             time.sleep(0.5)
 
-        if self.initial_reset is not True:
-            self.client.R.d['meta'] = True
-            self.client.respond_to_server()
+        if not self.client_mode:
+            if self.initial_reset is not True:
+                self.client.R.d['meta'] = True
+                self.client.respond_to_server()
 
-            ## TENTATIVE. Restarting TORCS every episode suffers the memory leak bug!
-            if relaunch is True:
-                self.reset_torcs()
-                # print("### TORCS is RELAUNCHED ###")
+                ## TENTATIVE. Restarting TORCS every episode suffers the memory leak bug!
+                if relaunch is True:
+                    self.reset_torcs()
+                    # print("### TORCS is RELAUNCHED ###")
 
         # Modify here if you use multiple tracks in the environment
         self.client = snakeoil3.Client(p=self.port, vision=False, client_mode=self.client_mode)  # Open new UDP in vtorcs

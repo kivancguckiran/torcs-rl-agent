@@ -53,8 +53,7 @@ def main():
 
     state = env.reset()
     for i in range(args.max_episode_steps):
-        u = agent.select_action(state)
-        action = env.preprocess_action(u)
+        action = agent.select_action(state)
         state, _, done, _ = env.step(action)
         if done:
             break
