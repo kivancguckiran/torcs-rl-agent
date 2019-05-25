@@ -42,7 +42,7 @@ def main():
                                   port=args.port)
     elif args.algo == "sac-lstm":
         env = torcs.ContinuousEnv(nstack=1,
-                                  filter=filter,
+                                  filter=filter_kernel,
                                   client_mode=True,
                                   port=args.port)
     else:
