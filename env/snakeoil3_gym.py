@@ -119,7 +119,7 @@ class Client():
         # If you don't like the option defaults,  change them here.
         self.vision = vision
 
-        self.host= 'localhost'
+        self.host= '127.0.0.1'
         self.port= 3001
         self.sid= 'SCR'
         self.maxEpisodes=1 # "Maximum number of learning episodes to perform"
