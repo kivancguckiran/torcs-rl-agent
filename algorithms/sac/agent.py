@@ -786,7 +786,7 @@ class SACAgentLSTM(AgentLSTM):
                 speed.append(self.env.last_speed)
 
                 # training
-                if len(self.memory) >= self.hyper_params["BATCH_SIZE"]:
+                if len(self.memory) >= self.hyper_params["BATCH_SIZE"] and len(self.memory) >= self.hyper_params["PREFILL_BUFFER_LENGTH"]:
                     for _ in range(self.hyper_params["MULTIPLE_LEARN"]):
                         loss = self.update_model()
                         loss_episode.append(loss)  # for logging

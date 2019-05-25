@@ -37,6 +37,7 @@ hyper_params = {
     "AUTO_ENTROPY_TUNING": True,
     "WEIGHT_DECAY": 0.0,
     "INITIAL_RANDOM_ACTION": int(1e4),
+    "PREFILL_BUFFER_LENGTH": int(1e4),
     "MULTIPLE_LEARN": 1,
     "BRAKE_REGION": int(2e5),
     "BRAKE_DIST_MU": int(1e5),
@@ -59,6 +60,9 @@ def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int)
     hidden_sizes_vf = [256, 256, 256]
     hidden_sizes_qf = [256, 256, 256]
     lstm_layer_size = 3
+
+    if args.load_from is not None:
+        hyper_params["INITIAL_RANDOM_ACTION"] = 0
 
     # target entropy
     target_entropy = -np.prod((action_dim,)).item()  # heuristic
