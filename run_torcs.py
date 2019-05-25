@@ -73,9 +73,10 @@ def main():
                                       track=args.track,
                                       filter=filter)
 
-    module_path = "torcs." + args.algo
-    example = importlib.import_module(module_path)
-    example.run(env, args, env.state_dim, env.action_dim)
+    module = importlib.import_module("torcs." + args.algo)
+
+    agent = module.init(env, args, env.state_dim, env.action_dim)
+    module.run(agent, test=args.test)
 
 
 if __name__ == "__main__":

@@ -46,7 +46,7 @@ hyper_params = {
 }
 
 
-def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int):
+def init(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int):
     """Run training or test.
 
     Args:
@@ -117,8 +117,17 @@ def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int)
     # create an agent
     agent = SACAgent(env, args, hyper_params, models, optims, target_entropy)
 
-    # run
-    if args.test:
+    return agent
+
+
+def run(agent, test):
+    if test:
         agent.test()
     else:
         agent.train()
+
+
+def action(agent, state):
+    u = agent.select_action(state)
+    return agent.env.preprocess_action(u)
+

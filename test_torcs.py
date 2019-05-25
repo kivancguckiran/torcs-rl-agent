@@ -42,27 +42,39 @@ def main():
         env = torcs.DiscretizedOldEnv(nstack=1,
                                       reward_type=args.reward_type,
                                       track=args.track,
-                                      filter=filter)
+                                      filter=filter,
+                                      client_mode=True)
     elif args.algo == "dqn21":
         env = torcs.DiscretizedEnv(nstack=1,
                                    reward_type=args.reward_type,
                                    track=args.track,
                                    filter=filter,
-                                   action_count=21)
+                                   action_count=21,
+                                   client_mode=True)
     elif args.algo == "sac":
         env = torcs.BitsPiecesContEnv(nstack=4,
                                       reward_type=args.reward_type,
                                       track=args.track,
-                                      filter=filter)
+                                      filter=filter,
+                                      client_mode=True)
     elif args.algo == "sac-lstm":
         env = torcs.BitsPiecesContEnv(nstack=1,
                                       reward_type=args.reward_type,
                                       track=args.track,
-                                      filter=filter)
+                                      filter=filter,
+                                      client_mode=True)
 
-    module_path = "torcs." + args.algo
-    example = importlib.import_module(module_path)
-    example.run(env, args, env.state_dim, env.action_dim)
+    module = importlib.import_module("torcs." + args.algo)
+
+    agent = module.init(env, args, env.state_dim, env.action_dim)
+
+    state = env.reset()
+    for i in range(args.max_episode_steps):
+        action = module.action(agent, state)
+        state, _, done, _ = env.step(action)
+        if done:
+            break
+    env.close()
 
 
 if __name__ == "__main__":

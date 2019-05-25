@@ -33,6 +33,9 @@ class DefaultEnv(TorcsEnv):
             return self.action_space.n
         return self.action_space.shape[0]
 
+    def preprocess_action(self, u):
+        return u
+
     def reset(self, relaunch=False, sampletrack=False, render=False):
         state = super().reset(relaunch, sampletrack, render)
         if self.nstack > 1:
@@ -41,6 +44,8 @@ class DefaultEnv(TorcsEnv):
         return state
 
     def step(self, u):
+        u = self.preprocess_action(u)
+
         next_state, reward, done, info = super().step(u)
 
         if self.filter is not None:
@@ -111,7 +116,7 @@ class BitsPiecesContEnv(DefaultEnv):
         super().__init__(port, nstack, reward_type, track, filter)
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,))
 
-    def step(self, u):
+    def preprocess_action(self, u):
         env_u = np.zeros(3)
 
         env_u[STEER] = u[0]
@@ -123,7 +128,7 @@ class BitsPiecesContEnv(DefaultEnv):
             env_u[ACCELERATE] = 0
             env_u[BRAKE] = (abs(u[1]) * 2) - 1
 
-        return super().step(env_u)
+        return env_u
 
     def try_brake(self, u):
         u[1] = torch.rand(1) - 1
