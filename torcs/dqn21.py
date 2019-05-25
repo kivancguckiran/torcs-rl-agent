@@ -23,12 +23,12 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # hyper parameters
 hyper_params = {
     "N_STEP": 3,
-    "GAMMA": 0.99,
+    "GAMMA": 0.975,
     "TAU": 5e-3,
     "W_N_STEP": 1.0,
     "W_Q_REG": 1e-7,
     "BUFFER_SIZE": int(1e5),
-    "BATCH_SIZE": 64,
+    "BATCH_SIZE": 32,
     "LR_DQN": 1e-4,  # dueling: 6.25e-5
     "ADAM_EPS": 1e-8,  # rainbow: 1.5e-4
     "WEIGHT_DECAY": 1e-7,
@@ -50,6 +50,12 @@ hyper_params = {
     # NoisyNet
     "USE_NOISY_NET": True,
     "STD_INIT": 0.5,
+    # Brake
+    "BRAKE_ENABLE": True,
+    "BRAKE_REGION": int(2e5),
+    "BRAKE_DIST_MU": int(1e5),
+    "BRAKE_DIST_SIGMA": int(3e4),
+    "BRAKE_FACTOR": 0.04
 }
 
 
@@ -65,7 +71,7 @@ def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int)
     """
     # create model
     def get_fc_model():
-        hidden_sizes = [128, 64]
+        hidden_sizes = [128, 128, 128]
 
         if hyper_params["USE_NOISY_NET"]:
             # use noisy net

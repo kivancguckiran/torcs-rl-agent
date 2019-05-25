@@ -16,7 +16,6 @@ from gym.spaces import Discrete
 from gym_torcs import TorcsEnv
 import numpy as np
 import torch
-import wandb
 
 
 class Agent(ABC):
@@ -124,9 +123,6 @@ class Agent(ABC):
 
     def test(self):
         """Test the agent."""
-        # logger
-        # if self.args.log:
-        #     wandb.init(project=self.args.wandb_project)
 
         self._test()
 
@@ -175,8 +171,6 @@ class Agent(ABC):
                 )
             )
 
-            # if self.args.log:
-            #     wandb.log({"test score": score})
 
 class AgentLSTM(ABC):
     """Abstract Agent used for all agents.
@@ -283,9 +277,6 @@ class AgentLSTM(ABC):
 
     def test(self):
         """Test the agent."""
-        # logger
-        # if self.args.log:
-        #     wandb.init(project=self.args.wandb_project)
 
         self._test()
 
@@ -334,7 +325,4 @@ class AgentLSTM(ABC):
                     avg_speed
                 )
             )
-
-            # if self.args.log:
-            #     wandb.log({"test score": score})
 

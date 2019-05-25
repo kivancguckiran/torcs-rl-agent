@@ -560,6 +560,16 @@ def drive_example(c):
         R['gear']=6
     return
 
+def client_test(self, ):
+    """Test the agent on remote host machine."""
+
+    client = Client(p=3101, H='10.0.0.55')
+    for i in range(args.max_episode_steps):
+        C.get_servers_input()
+        drive_example(C)
+        C.respond_to_server()
+    C.shutdown()
+
 # ================ MAIN ================
 if __name__ == "__main__":
     C= Client(p=3101, H='10.0.0.55')
@@ -568,3 +578,4 @@ if __name__ == "__main__":
         drive_example(C)
         C.respond_to_server()
     C.shutdown()
+

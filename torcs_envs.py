@@ -48,7 +48,7 @@ class DefaultEnv(TorcsEnv):
             while len(self.filter_buffer) < self.filter_size:
                 self.filter_buffer.append(next_state)
             prev_state = np.array(self.filter_buffer)
-            next_state = np.sum(np.multiply(prev_state, self.filter), axis=0) / self.filter_size
+            next_state = np.sum(np.multiply(prev_state, self.filter), axis=0) / sum(self.filter)
 
         if self.nstack > 1:
             self.stack_buffer.append(next_state)
@@ -170,6 +170,10 @@ class DiscretizedEnv(DefaultEnv):
         env_u[BRAKE] = self.brake_actions[u]
 
         return super().step(env_u)
+
+    def try_brake(self, u):
+        brake_actions = np.linspace(2, self.action_dim - 1, self.action_dim // 3)
+        return int(np.random.choice(brake_actions))
 
 
 class DiscretizedInriaEnv(DefaultEnv):

@@ -16,7 +16,6 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
-import wandb
 
 from algorithms.common.abstract.agent import Agent, AgentLSTM
 from algorithms.common.buffer.replay_buffer import ReplayBuffer, EpisodeBuffer

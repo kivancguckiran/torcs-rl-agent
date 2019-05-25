@@ -108,6 +108,15 @@ class DQNAgent(Agent):
                     gamma=self.hyper_params["GAMMA"],
                 )
 
+        brake_x = np.linspace(
+            0,
+            self.hyper_params["BRAKE_REGION"],
+            self.hyper_params["BRAKE_REGION"],
+        )
+
+        self.brakes = np.exp(-np.power(brake_x - self.hyper_params["BRAKE_DIST_MU"], 2.) / (
+                    2 * np.power(self.hyper_params["BRAKE_DIST_SIGMA"], 2.)))
+
     def select_action(self, state: np.ndarray) -> np.ndarray:
         """Select an action from the input space."""
         self.curr_state = state
@@ -355,7 +364,7 @@ class DQNAgent(Agent):
 
                 if "BRAKE_ENABLE" in self.hyper_params and self.hyper_params["BRAKE_ENABLE"]:
                     if "BRAKE_REGION" in self.hyper_params and self.total_step < self.hyper_params["BRAKE_REGION"]:
-                        if np.random.random() < self.hyper_params["BRAKE_FACTOR"]:
+                        if np.random.random() < self.brakes[self.i_episode] * self.hyper_params["BRAKE_FACTOR"]:
                             action = self.env.try_brake(action)
 
                 next_state, reward, done = self.step(action)
