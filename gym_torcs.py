@@ -177,11 +177,10 @@ class TorcsEnv:
             speedX = obs['speedX'] / 200
             speedY = obs['speedY'] / 200
 
-
             lidar_front = obs['track'][10]##lidar value on front of the car ( lidar 10th)
             lidar_penalty_on = 1 if np.abs(lidar_front)<=50 else 0
-            lidar_rate = np.abs(lidar_front)/np.abs(50)
-            lidar_penalty_ratio=np.power(lidar_rate,lidar_penalty_on)
+            lidar_rate = np.abs(lidar_front)/50
+            lidar_penalty_ratio = np.power(lidar_rate,lidar_penalty_on)
 
             reward = speedX * np.cos(1.0 * obs['angle']) \
                         - np.abs(1.0 * speedX * np.sin(obs['angle'])) \
