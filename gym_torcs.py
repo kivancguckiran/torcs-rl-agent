@@ -184,13 +184,11 @@ class TorcsEnv:
             clipped_cos = sigmoid(np.cos(obs['angle']) * 3)
             inverse_clipped_cos = (1 - clipped_cos) / 2
             reward = Vx * clipped_cos - Vx * inverse_clipped_cos - Vy * clipped_cos
-        elif self.reward_type == 'without_cos':
+        elif self.reward_type == 'paper':
             Vx = obs['speedX'] / 200
-            Vy = obs['speedY'] / 200
-            V = np.sqrt(Vx ** 2 + Vy ** 2)
             costheta = np.cos(obs['angle'])
             d = np.abs(obs['trackPos'])
-            reward = V * (costheta - d)
+            reward = Vx * (costheta - d)
         elif self.reward_type == 'race_pos':
             reward = progress - np.abs(sp * np.sin(obs["angle"]))  # no trackpos
             if obs['racePos'] > obs_pre['racePos']:
