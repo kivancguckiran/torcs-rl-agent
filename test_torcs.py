@@ -22,8 +22,6 @@ parser.add_argument(
 parser.add_argument(
     "--use-filter", dest="filter", action="store_true", help="apply filter to observations")
 parser.add_argument(
-    "--host", dest="host", type=str, help="host machine")
-parser.add_argument(
     "--port", dest="post", type=str, help="port")
 
 parser.set_defaults(test=True)
@@ -40,26 +38,30 @@ def main():
                                       reward_type=args.reward_type,
                                       track=args.track,
                                       filter=filter,
-                                      client_mode=True)
+                                      client_mode=True,
+                                      port=args.port)
     elif args.algo == "dqn21":
         env = torcs.DiscretizedEnv(nstack=1,
                                    reward_type=args.reward_type,
                                    track=args.track,
                                    filter=filter,
                                    action_count=21,
-                                   client_mode=True)
+                                   client_mode=True,
+                                   port=args.port)
     elif args.algo == "sac":
         env = torcs.BitsPiecesContEnv(nstack=4,
                                       reward_type=args.reward_type,
                                       track=args.track,
                                       filter=filter,
-                                      client_mode=True)
+                                      client_mode=True,
+                                      port=args.port)
     elif args.algo == "sac-lstm":
         env = torcs.BitsPiecesContEnv(nstack=1,
                                       reward_type=args.reward_type,
                                       track=args.track,
                                       filter=filter,
-                                      client_mode=True)
+                                      client_mode=True,
+                                      port=args.port)
 
     module = importlib.import_module("torcs." + args.algo)
 
