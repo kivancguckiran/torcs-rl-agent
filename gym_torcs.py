@@ -171,6 +171,23 @@ class TorcsEnv:
                         - np.abs(1.0 * speedX * np.sin(obs['angle'])) \
                         - 2 * speedX * np.abs(obs['trackPos'] * np.sin(obs['angle'])) \
                         - speedY * np.cos(obs['angle'])
+
+
+        elif self.reward_type == 'extra_github_lidar':
+            speedX = obs['speedX'] / 200
+            speedY = obs['speedY'] / 200
+
+            lidar_front = obs['track'][10]##lidar value on front of the car ( lidar 10th)
+            lidar_penalty_on = 1 if np.abs(lidar_front)<=50 else 0
+            lidar_rate = np.abs(lidar_front)/50
+            lidar_penalty_ratio = np.power(lidar_rate,lidar_penalty_on)
+
+            reward = speedX * np.cos(1.0 * obs['angle']) \
+                        - np.abs(1.0 * speedX * np.sin(obs['angle'])) \
+                        - 2 * speedX * np.abs(obs['trackPos'] * np.sin(obs['angle'])) \
+                        - speedY * np.cos(obs['angle'])
+
+            reward = lidar_penalty_ratio * reward
         elif self.reward_type == 'last_resort':
             Vx = obs['speedX'] / 200
             Vy = obs['speedY'] / 200
