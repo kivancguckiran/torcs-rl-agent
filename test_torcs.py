@@ -20,8 +20,6 @@ parser.add_argument(
 parser.add_argument(
     "--test", dest="test", action="store_true", help="test mode (no training)")
 parser.add_argument(
-    "--on-render", dest="render", action="store_true", help="turn on rendering")
-parser.add_argument(
     "--use-filter", dest="filter", action="store_true", help="apply filter to observations")
 parser.add_argument(
     "--host", dest="host", type=str, help="host machine")
@@ -30,7 +28,6 @@ parser.add_argument(
 
 parser.set_defaults(test=True)
 parser.set_defaults(load_from=None)
-parser.set_defaults(render=True)
 parser.set_defaults(filter=False)
 args = parser.parse_args()
 
