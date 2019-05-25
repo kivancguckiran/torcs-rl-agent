@@ -50,8 +50,9 @@ class TorcsEnv:
 
     initial_reset = True
 
-    def __init__(self, port=3101, path=None, reward_type='original', track='none'):
+    def __init__(self, port=3101, path=None, reward_type='original', track='none', client_mode=False):
         self.port = port
+        self.client_mode = client_mode
         self.initial_run = True
         self.reward_type = reward_type
         self.reset_counter = 0
@@ -297,7 +298,7 @@ class TorcsEnv:
                 # print("### TORCS is RELAUNCHED ###")
 
         # Modify here if you use multiple tracks in the environment
-        self.client = snakeoil3.Client(p=self.port, vision=False)  # Open new UDP in vtorcs
+        self.client = snakeoil3.Client(p=self.port, vision=False, client_mode=self.client_mode)  # Open new UDP in vtorcs
         self.client.MAX_STEPS = np.inf
 
         client = self.client
@@ -311,7 +312,8 @@ class TorcsEnv:
         return self.get_obs()
 
     def kill(self):
-        os.system('pkill torcs')
+        if not self.client_mode:
+            os.system('pkill torcs')
 
     def close(self):
         self.client.R.d['meta'] = True
@@ -321,13 +323,13 @@ class TorcsEnv:
         return self.observation
 
     def reset_torcs(self, port=3101):
-       #print("relaunch torcs")
-        os.system('pkill torcs')
-        time.sleep(0.5)
-        os.system('torcs -nofuel -nodamage -nolaptime -p 3101 &')
-        time.sleep(0.5)
-        os.system('sh autostart.sh')
-        time.sleep(0.5)
+        if not self.client_mode:
+            os.system('pkill torcs')
+            time.sleep(0.5)
+            os.system('torcs -nofuel -nodamage -nolaptime -p 3101 &')
+            time.sleep(0.5)
+            os.system('sh autostart.sh')
+            time.sleep(0.5)
 
     def agent_to_torcs(self, u):
         torcs_action = {'steer': u[0]}

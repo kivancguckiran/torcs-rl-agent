@@ -115,7 +115,7 @@ def bargraph(x,mn,mx,w,c='X'):
     return '[%s]' % (nnc+npc+ppc+pnc)
 
 class Client():
-    def __init__(self,H=None,p=None,i=None,e=None,t=None,s=None,d=None,vision=False):
+    def __init__(self,H=None,p=None,i=None,e=None,t=None,s=None,d=None,vision=False,client_mode=False):
         # If you don't like the option defaults,  change them here.
         self.vision = vision
 
@@ -127,6 +127,7 @@ class Client():
         self.stage= 3 # 0=Warm-up, 1=Qualifying 2=Race, 3=unknown <Default=3>
         self.debug= False
         self.maxSteps= 100000  # 50steps/second
+        self.clientMode = client_mode
         # self.parse_the_command_line()
         if H: self.host= H
         if p: self.port= p
@@ -140,15 +141,16 @@ class Client():
         self.setup_connection()
 
     def relaunch(self):
-        os.system('pkill torcs')
-        time.sleep(1.0)
-        if self.vision is False:
-            os.system('torcs -nofuel -nodamage -nolaptime &')
-        else:
-            os.system('torcs -nofuel -nodamage -nolaptime -vision &')
-        time.sleep(1.0)
-        os.system('sh autostart.sh')
-        time.sleep(1.0)
+        if not self.clientMode:
+            os.system('pkill torcs')
+            time.sleep(1.0)
+            if self.vision is False:
+                os.system('torcs -nofuel -nodamage -nolaptime &')
+            else:
+                os.system('torcs -nofuel -nodamage -nolaptime -vision &')
+            time.sleep(1.0)
+            os.system('sh autostart.sh')
+            time.sleep(1.0)
 
     def setup_connection(self):
         # == Set Up UDP Socket ==
