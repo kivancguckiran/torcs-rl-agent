@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
 import argparse
 import importlib
 
-import torcs_envs as torcs
+from env import torcs_envs as torcs
 
 
-# configurations
-parser = argparse.ArgumentParser(description="Pytorch RL algorithms")
+parser = argparse.ArgumentParser(description="TORCS")
 parser.add_argument(
     "--seed", type=int, default=777, help="random seed for reproducibility")
 parser.add_argument(
@@ -29,40 +27,38 @@ args = parser.parse_args()
 
 
 def main():
-    filter = None if not args.filter else [5., 2., 1.]  # example filter (recent to previous)
+    filter_kernel = None if not args.filter else [5., 2., 1.]  # example filter (recent to previous)
 
-    if args.algo == "dqn9":
-        env = torcs.DiscretizedOldEnv(nstack=1,
-                                      filter=filter,
-                                      client_mode=True,
-                                      port=args.port)
-    elif args.algo == "dqn21":
+    if args.algo == "dqn":
         env = torcs.DiscretizedEnv(nstack=1,
-                                   filter=filter,
+                                   filter=filter_kernel,
                                    action_count=21,
                                    client_mode=True,
                                    port=args.port)
     elif args.algo == "sac":
-        env = torcs.BitsPiecesContEnv(nstack=4,
-                                      filter=filter,
-                                      client_mode=True,
-                                      port=args.port)
+        env = torcs.ContinuousEnv(nstack=4,
+                                  filter=filter_kernel,
+                                  client_mode=True,
+                                  port=args.port)
     elif args.algo == "sac-lstm":
-        env = torcs.BitsPiecesContEnv(nstack=1,
-                                      filter=filter,
-                                      client_mode=True,
-                                      port=args.port)
+        env = torcs.ContinuousEnv(nstack=1,
+                                  filter=filter,
+                                  client_mode=True,
+                                  port=args.port)
+    else:
+        raise Exception("Invalid algorithm!")
 
     module = importlib.import_module("torcs." + args.algo)
-
-    agent = module.init(env, args, env.state_dim, env.action_dim)
+    agent = module.init(env, args)
 
     state = env.reset()
     for i in range(args.max_episode_steps):
-        action = module.action(agent, state)
+        u = agent.select_action(state)
+        action = env.preprocess_action(u)
         state, _, done, _ = env.step(action)
         if done:
             break
+
     env.close()
 
 

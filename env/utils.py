@@ -31,15 +31,18 @@ NEW_TRACKS = [
     ("alpine-2", "road"),
 ]
 
+
 def _find_by_name(nodes, key):
     for node in nodes:
         if node.attrib["name"] == key:
             return node
 
+
 def _find_by_tag(nodes, tag):
     for node in nodes:
         if node.tag == tag:
             return node
+
 
 def sample_track(root_node, counter, track):
     node = _find_by_name(root_node, "Tracks")
@@ -58,6 +61,7 @@ def sample_track(root_node, counter, track):
     tracktype_node.attrib["val"] = tracktype
 
     return trackname, tracktype
+
 
 def set_render_mode(root_node, render=True):
     node = _find_by_name(root_node, "Quick Race")

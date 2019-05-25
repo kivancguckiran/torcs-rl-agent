@@ -1,18 +1,27 @@
-from gym_torcs import TorcsEnv
-from gym import spaces
 import numpy as np
-from collections import deque
 import torch
+
+from collections import deque
+
+from env.gym_torcs import TorcsEnv
+from gym import spaces
 
 
 STEER = 0
-ACCELERATE = 1
+ACCEL = 1
 BRAKE = 2
 
 
 class DefaultEnv(TorcsEnv):
-    def __init__(self, port=3101, nstack=1, reward_type='no_trackpos', track='none', filter=None, client_mode=False):
-        super().__init__(port, path='/usr/local/share/games/torcs/config/raceman/quickrace.xml',
+    def __init__(self,
+                 port=3101,
+                 nstack=1,
+                 reward_type='sigmoid',
+                 track='none',
+                 filter=None,
+                 client_mode=False):
+        super().__init__(port,
+                         path='/usr/local/share/games/torcs/config/raceman/quickrace.xml',
                          reward_type=reward_type,
                          client_mode=client_mode,
                          track=track)
@@ -66,8 +75,14 @@ class DefaultEnv(TorcsEnv):
         return action
 
 
-class BitsPiecesContEnv(DefaultEnv):
-    def __init__(self, port=3101, nstack=1, reward_type='no_trackpos', track='none', filter=None, client_mode=False):
+class ContinuousEnv(DefaultEnv):
+    def __init__(self,
+                 port=3101,
+                 nstack=1,
+                 reward_type='sigmoid',
+                 track='none',
+                 filter=None,
+                 client_mode=False):
         super().__init__(port, nstack, reward_type, track, filter, client_mode)
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,))
 
@@ -77,10 +92,10 @@ class BitsPiecesContEnv(DefaultEnv):
         env_u[STEER] = u[0]
 
         if u[1] > 0:
-            env_u[ACCELERATE] = u[1]
+            env_u[ACCEL] = u[1]
             env_u[BRAKE] = -1
         else:
-            env_u[ACCELERATE] = 0
+            env_u[ACCEL] = 0
             env_u[BRAKE] = (abs(u[1]) * 2) - 1
 
         return env_u
@@ -91,8 +106,14 @@ class BitsPiecesContEnv(DefaultEnv):
 
 
 class DiscretizedEnv(DefaultEnv):
-    def __init__(self, port=3101, nstack=1, reward_type='no_trackpos', track='none', filter=None,
-                 action_count=21, client_mode=False):
+    def __init__(self,
+                 port=3101,
+                 nstack=1,
+                 reward_type='sigmoid',
+                 track='none',
+                 filter=None,
+                 action_count=21,
+                 client_mode=False):
         super().__init__(port, nstack, reward_type, track, filter, client_mode)
 
         assert (action_count + 3) % 6 == 0
@@ -103,72 +124,15 @@ class DiscretizedEnv(DefaultEnv):
         self.brake_actions = np.tile([-1, -1, 1], action_count // 3)
         self.steer_actions = np.repeat(np.linspace(-1, 1, action_count // 3), 3).flatten()
 
-    def step(self, u):
+    def preprocess_action(self, u):
         env_u = np.zeros(3)
 
-        env_u[ACCELERATE] = self.accelerate_actions[u]
+        env_u[ACCEL] = self.accelerate_actions[u]
         env_u[STEER] = self.steer_actions[u]
         env_u[BRAKE] = self.brake_actions[u]
 
-        return super().step(env_u)
+        return env_u
 
     def try_brake(self, u):
         brake_actions = np.linspace(2, self.action_dim - 1, self.action_dim // 3)
         return int(np.random.choice(brake_actions))
-
-
-class DiscretizedOldEnv(DefaultEnv):
-    def __init__(self, port=3101, nstack=1, reward_type='no_trackpos', track='none', filter=None, client_mode=False):
-        super().__init__(port, nstack, reward_type, track, filter, client_mode)
-        self.action_space = spaces.Discrete(9)
-
-    def step(self, u):
-        env_u = np.zeros(3)
-
-        if u == 0:
-            # steer = 1, throttle = 1, brake = -1
-            env_u[STEER] = 1
-            env_u[ACCELERATE] = 1
-            env_u[BRAKE] = -1
-        elif u == 1:
-            # steer = 0, throttle = 1, brake = -1
-            env_u[STEER] = 0
-            env_u[ACCELERATE] = 1
-            env_u[BRAKE] = -1
-        elif u == 2:
-            # steer = -1, throttle = 1, brake = -1
-            env_u[STEER] = -1
-            env_u[ACCELERATE] = 1
-            env_u[BRAKE] = -1
-        elif u == 3:
-            # steer = 1, throttle = 0, brake = -1
-            env_u[STEER] = 1
-            env_u[ACCELERATE] = 0
-            env_u[BRAKE] = -1
-        elif u == 4:
-            # steer = 0, throttle = 0, brake = -1
-            env_u[STEER] = 0
-            env_u[ACCELERATE] = 0
-            env_u[BRAKE] = -1
-        elif u == 5:
-            # steer = -1, throttle = 0, brake = -1
-            env_u[STEER] = -1
-            env_u[ACCELERATE] = 0
-            env_u[BRAKE] = -1
-        elif u == 6:
-            # steer = 1, throttle = 0, brake = 1
-            env_u[STEER] = 1
-            env_u[ACCELERATE] = 0
-            env_u[BRAKE] = 1
-        elif u == 7:
-            # steer = 0, throttle = 0, brake = 1
-            env_u[STEER] = 0
-            env_u[ACCELERATE] = 0
-            env_u[BRAKE] = 1
-        elif u == 8:
-            # steer = -1, throttle = 0, brake = 1
-            env_u[STEER] = -1
-            env_u[ACCELERATE] = 0
-            env_u[BRAKE] = 1
-
-        return super().step(env_u)

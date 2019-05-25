@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
 import argparse
 import importlib
 
-import torcs_envs as torcs
+from env import torcs_envs as torcs
 
 
-# configurations
-parser = argparse.ArgumentParser(description="Pytorch RL algorithms")
+parser = argparse.ArgumentParser(description="TORCS")
 parser.add_argument(
     "--seed", type=int, default=777, help="random seed for reproducibility")
 parser.add_argument(
@@ -49,34 +47,34 @@ args = parser.parse_args()
 
 
 def main():
-    filter = None if not args.filter else [5., 2., 1.]  # example filter (recent to previous)
+    filter_kernel = None if not args.filter else [5., 2., 1.]  # example filter (recent to previous)
 
-    if args.algo == "dqn9":
-        env = torcs.DiscretizedOldEnv(nstack=1,
-                                      reward_type=args.reward_type,
-                                      track=args.track,
-                                      filter=filter)
-    elif args.algo == "dqn21":
+    if args.algo == "dqn":
         env = torcs.DiscretizedEnv(nstack=1,
                                    reward_type=args.reward_type,
                                    track=args.track,
-                                   filter=filter,
+                                   filter=filter_kernel,
                                    action_count=21)
     elif args.algo == "sac":
-        env = torcs.BitsPiecesContEnv(nstack=4,
-                                      reward_type=args.reward_type,
-                                      track=args.track,
-                                      filter=filter)
+        env = torcs.ContinuousEnv(nstack=4,
+                                  reward_type=args.reward_type,
+                                  track=args.track,
+                                  filter=filter_kernel)
     elif args.algo == "sac-lstm":
-        env = torcs.BitsPiecesContEnv(nstack=1,
-                                      reward_type=args.reward_type,
-                                      track=args.track,
-                                      filter=filter)
+        env = torcs.ContinuousEnv(nstack=1,
+                                  reward_type=args.reward_type,
+                                  track=args.track,
+                                  filter=filter_kernel)
+    else:
+        raise Exception("Invalid algorithm!")
 
     module = importlib.import_module("torcs." + args.algo)
+    agent = module.init(env, args)
 
-    agent = module.init(env, args, env.state_dim, env.action_dim)
-    module.run(agent, test=args.test)
+    if args.test:
+        agent.test()
+    else:
+        agent.train()
 
 
 if __name__ == "__main__":

@@ -1,17 +1,14 @@
-import gym
 from gym import spaces
-import numpy as np
-import snakeoil3_gym as snakeoil3
+from env import snakeoil3_gym as snakeoil3
 import numpy as np
 import copy
-import collections as col
 import os
 import time
 import xml.etree.ElementTree as ET
 
-from utils import sample_track
-from utils import set_render_mode
-from utils import sigmoid
+from env.utils import sample_track
+from env.utils import set_render_mode
+from env.utils import sigmoid
 
 
 class TorcsEnv:

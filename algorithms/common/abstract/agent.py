@@ -13,7 +13,7 @@ from typing import Tuple, Union
 
 import gym
 from gym.spaces import Discrete
-from gym_torcs import TorcsEnv
+from env.gym_torcs import TorcsEnv
 import numpy as np
 import torch
 
