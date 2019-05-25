@@ -44,7 +44,7 @@ class TorcsEnv:
         reset: send a message to reset the game.
 
     """
-    terminal_judge_start = 100  # Speed limit is applied after this step
+    terminal_judge_start = 250  # Speed limit is applied after this step
     termination_limit_progress = 5/200  # [km/h], episode terminates if car is running slower than this limit
     backward_counter = 0
 
@@ -220,7 +220,7 @@ class TorcsEnv:
                 # client.R.d['meta'] = True
 
             self.backward_counter += 1
-            if self.backward_counter >= 100:
+            if self.backward_counter >= 250:
                 episode_terminate = True
         else:
             self.backward_counter = 0
@@ -248,6 +248,7 @@ class TorcsEnv:
                     Relaunch needs to be true in order to modify the track!
         """
         self.time_step = 0
+        self.backward_counter = 0
 
         if relaunch:
             if sampletrack:

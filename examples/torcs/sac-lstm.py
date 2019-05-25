@@ -37,6 +37,7 @@ hyper_params = {
     "AUTO_ENTROPY_TUNING": True,
     "WEIGHT_DECAY": 0.0,
     "INITIAL_RANDOM_ACTION": int(1e4),
+    "PREFILL_BUFFER": 16,
     "MULTIPLE_LEARN": 1,
     "BRAKE_REGION": int(2e5),
     "BRAKE_DIST_MU": int(1e5),
@@ -58,7 +59,7 @@ def run(env: gym.Env, args: argparse.Namespace, state_dim: int, action_dim: int)
     hidden_sizes_actor = [512, 256, 128]
     hidden_sizes_vf = [512, 256, 128]
     hidden_sizes_qf = [512, 256, 128]
-    lstm_layer_size = 3
+    lstm_layer_size = 1
 
     if args.load_from is not None:
         hyper_params["INITIAL_RANDOM_ACTION"] = 0

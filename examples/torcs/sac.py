@@ -36,6 +36,7 @@ hyper_params = {
     "AUTO_ENTROPY_TUNING": True,
     "WEIGHT_DECAY": 0.0,
     "INITIAL_RANDOM_ACTION": int(1e4),
+    "PREFILL_BUFFER": int(1e4),
     "MULTIPLE_LEARN": 1,
     "BRAKE_ENABLE": True,
     "BRAKE_REGION": int(2e5),

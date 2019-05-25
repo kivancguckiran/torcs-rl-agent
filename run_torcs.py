@@ -76,9 +76,14 @@ def main():
                                         steer_count=9,
                                         accel_count=3,
                                         steer_brake_count=5)
-    else:
-        env = torcs.BitsPiecesContEnv(nstack=args.num_stack,
-                                      reward_type=args.reward_type,
+    elif args.algo == "sac":
+        env = torcs.BitsPiecesContEnv(nstack=4,
+                                      reward_type='extra_github',
+                                      track=args.track,
+                                      filter=filter)
+    elif args.algo == "sac-lstm":
+        env = torcs.BitsPiecesContEnv(nstack=1,
+                                      reward_type='extra_github',
                                       track=args.track,
                                       filter=filter)
 
