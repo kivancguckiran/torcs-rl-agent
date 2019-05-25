@@ -184,6 +184,12 @@ class TorcsEnv:
             clipped_cos = sigmoid(np.cos(obs['angle']) * 3)
             inverse_clipped_cos = (1 - clipped_cos) / 2
             reward = Vx * clipped_cos - Vx * inverse_clipped_cos - Vy * clipped_cos
+        elif self.reward_type == 'sigmoid_v2':
+            Vx = obs['speedX'] / 200
+            Vy = obs['speedY'] / 200
+            clipped_cos = sigmoid(np.cos(obs['angle']) * 2)
+            inverse_clipped_cos = (1 - clipped_cos) / 2
+            reward = Vx * clipped_cos - Vx * inverse_clipped_cos - Vy * clipped_cos
         elif self.reward_type == 'paper':
             Vx = obs['speedX'] / 200
             costheta = np.cos(obs['angle'])
