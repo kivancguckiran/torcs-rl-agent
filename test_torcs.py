@@ -20,7 +20,7 @@ parser.add_argument(
 parser.add_argument(
     "--use-filter", dest="filter", action="store_true", help="apply filter to observations")
 parser.add_argument(
-    "--port", dest="port", type=str, help="port")
+    "--port", dest="port", type=int, help="port")
 
 parser.set_defaults(test=True)
 parser.set_defaults(load_from=None)
