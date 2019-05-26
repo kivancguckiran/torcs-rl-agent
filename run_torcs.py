@@ -37,17 +37,21 @@ parser.add_argument(
     "--track", type=str, default="none", help="track name")
 parser.add_argument(
     "--use-filter", dest="filter", action="store_true", help="apply filter to observations")
+parser.add_argument(
+    "--use-action-filter", dest="action_filter", action="store_true", help="apply filter to actions")
 
 parser.set_defaults(test=False)
 parser.set_defaults(load_from=None)
 parser.set_defaults(render=False)
 parser.set_defaults(log=True)
 parser.set_defaults(filter=False)
+parser.set_defaults(action_filter=False)
 args = parser.parse_args()
 
 
 def main():
     filter_kernel = None if not args.filter else [5., 2., 1.]  # example filter (recent to previous)
+    action_filter_kernel = None if not args.filter else [5., 2., 1.]
 
     if args.algo == "dqn":
         env = torcs.DiscretizedEnv(nstack=1,
@@ -59,12 +63,14 @@ def main():
         env = torcs.ContinuousEnv(nstack=4,
                                   reward_type=args.reward_type,
                                   track=args.track,
-                                  filter=filter_kernel)
+                                  filter=filter_kernel,
+                                  action_filter=action_filter_kernel)
     elif args.algo == "sac-lstm":
         env = torcs.ContinuousEnv(nstack=1,
                                   reward_type=args.reward_type,
                                   track=args.track,
-                                  filter=filter_kernel)
+                                  filter=filter_kernel,
+                                  action_filter=action_filter_kernel)
     else:
         raise Exception("Invalid algorithm!")
 

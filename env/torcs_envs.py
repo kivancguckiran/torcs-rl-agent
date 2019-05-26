@@ -82,9 +82,15 @@ class ContinuousEnv(DefaultEnv):
                  reward_type='extra_github',
                  track='none',
                  filter=None,
-                 client_mode=False):
+                 client_mode=False,
+                 action_filter=None):
         super().__init__(port, nstack, reward_type, track, filter, client_mode)
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,))
+        self.action_filter = action_filter
+        if action_filter is not None:
+            self.action_filter = np.tile(np.array(filter).reshape(-1, 1), 3)  # torcs env default action lenght
+            self.action_filter_size = self.action_filter.shape[0]
+            self.action_filter_buffer = deque(maxlen=self.action_filter_size)
 
     def preprocess_action(self, u):
         env_u = np.zeros(3)
@@ -97,6 +103,13 @@ class ContinuousEnv(DefaultEnv):
         else:
             env_u[ACCEL] = 0
             env_u[BRAKE] = (abs(u[1]) * 2) - 1
+
+        if self.action_filter is not None:
+            self.action_filter_buffer.append(env_u)
+            while len(self.action_filter_buffer) < self.action_filter_size:
+                self.action_filter_buffer.append(env_u)
+            prev_action = np.array(self.action_filter_buffer)
+            env_u = np.sum(np.multiply(prev_action, self.action_filter), axis=0) / sum(self.action_filter)
 
         return env_u
 
