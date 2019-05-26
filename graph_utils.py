@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import random
+import string
 
 
 ##Various algorithms log order per column
@@ -43,10 +45,6 @@ def get_color(color_index):
         return "magenta"
 
 
-def plot_algo_features(files,x_column,y_columns):
-    #TODO
-    pass
-
 
 def plot_algos(files,x_column,y_column,smooth_factor=100):
 
@@ -71,6 +69,10 @@ def plot_algos(files,x_column,y_column,smooth_factor=100):
         # Moving average y_values
         y_values = smoother(y_values, smooth_factor)
 
+        # Cut exceeding episodes
+        y_values = y_values[:min_iteration]
+        x_values = x_values[:len(y_values)]  ##smoothing reduces the array length a bit
+
         #Get line color and advance to new color
         color = get_color(color_index)
         color_index+=1
@@ -84,7 +86,7 @@ def plot_algos(files,x_column,y_column,smooth_factor=100):
     plt.show()
 
 
-def plot_algos_new(files, x_column, y_column, smooth_factor=100):
+def plot_multi_algo_single_feature(files, x_column, y_column, smooth_factor=100):
     color_index = 0
 
     # find min_episode for plots
@@ -115,20 +117,86 @@ def plot_algos_new(files, x_column, y_column, smooth_factor=100):
         y_values = smoother(y_values, smooth_factor)
 
         #Cut exceeding episodes
-        x_values = x_values[:min_episode]
         y_values = y_values[:min_episode]
+        x_values = x_values[:len(y_values)] ##smoothing reduces the array length a bit
+
 
         # Get line color and advance to new color
         color = get_color(color_index)
         color_index += 1
 
         # Plot
-        plt.plot(y_values, color=color, label=algo)
+        #plt.plot(y_values, color=color, label=algo)
+        plt.plot(x_values,y_values, color=color, label=algo)
 
         plt.xlabel(x_column)
         plt.ylabel(y_column)
     plt.legend()
     plt.show()
+
+def plot_algo_per_track(files, x_column, y_column,tracks, smooth_factor=100):
+    color_index = 0
+
+    # find min_iteration for plots
+    # load logs
+    all_logs = []
+    for logfilename_name in files:
+        logs = read_log_file_to_df(logfilename_name)
+        all_logs.append(logs)
+
+    # cut lenght to the min epiosode of logs
+    min_iteration = np.min([len(logs) for logs in all_logs])
+
+
+    for track in tracks:
+
+        for file in files:
+            # Find algorithm type
+            algo = file.split("_")[1]
+            print("algo:" + algo)
+
+            # Get column indices
+            x_indice = get_column_indice(algo, x_column)
+            y_indice = get_column_indice(algo, y_column)
+            print(
+                "x_column:" + x_column + " indice:" + str(x_indice) + " y_column:" + y_column + " indice:" + str(y_indice))
+
+            # Get column values
+            df = read_log_file_to_df(file)
+
+            #df["track_name"].unique()
+
+            # Only relevant tracks
+            if len(tracks)>0:
+                df = df[df["track_name"]==track]
+
+            x_values = df[x_column]
+            y_values = df[y_column]
+
+            # Moving average y_values
+            y_values = smoother(y_values, smooth_factor)
+
+            #Cut exceeding episodes
+            y_values = y_values[:min_iteration]
+            x_values = x_values[:len(y_values)] ##smoothing reduces the array length a bit
+
+            # Get line color and advance to new color
+            color = get_color(color_index)
+            color_index += 1
+
+            # Plot
+            #plt.plot(y_values, color=color, label=algo)
+            #plt.plot(x_values,y_values, color=color, label=algo+"-"+track)
+            plt.plot(x_values, y_values, label=algo + "-" + track)
+            plt.savefig('graphs/test' + algo+".jpg", bbox_inches='tight')
+
+            plt.xlabel(x_column)
+            plt.ylabel(y_column)
+
+    plt.legend()
+    persist_figure("tracks")
+    plt.show()
+
 
 def smoother(array, ws):
     """ Return smoothed array by the mean filter """
@@ -170,7 +238,23 @@ def read_log_file_to_df(filename):
     return df
 
 
+def persist_figure(title):
+    rnd_filename= ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    plt.savefig('graphs/' + title+"_"+rnd_filename+".jpg", bbox_inches='tight')
+
+
 def plot_same_algo_different_runs(logfilename_name_pairs, texts=[[""] * 3], smooth_factor=100):
+
+    # find min_iteration for plots
+    # load logs
+    all_logs = []
+    for logfilename_name,name in logfilename_name_pairs:
+        logs = read_log_file_to_df(logfilename_name)
+        all_logs.append(logs)
+
+    # cut lenght to the min epiosode of logs
+    min_iteration = np.min([len(logs) for logs in all_logs])
+
 
     for i, (title, xlabel, ylabel,y_axis_title) in enumerate(texts):
 
@@ -203,6 +287,7 @@ def plot_same_algo_different_runs(logfilename_name_pairs, texts=[[""] * 3], smoo
                          np.minimum(mean_logs-std_logs, min_logs),
                          alpha=0.4)
 
+    persist_figure(title);
     plt.show()
 
 
@@ -215,26 +300,39 @@ if __name__ == "__main__":
     plot_texts = [
         [
             "Max Speed",#x_column_legend
-            "episode", #x_column value
+            "total_step", #x_column value
             "max_speed", ## y_column value
             "speed" ##y_axis title
         ],
         [
             "Average Speed",#x_column_legend
-            "episode",#x_column value
+            "total_step",#x_column value
             "avg_speed",## y_column value
             "speed",##y_axis title
 
         ]
     ]
-    # plot_same_algo_different_runs([("releases/TORCS_SAC_N4_G99_2000.log", "SAC_N4"), ("releases/TORCS_SAC_N4_UF_G95_2000EP.log", "SAC_N4")], texts=plot_texts)
+    plot_same_algo_different_runs([("releases/TORCS_SAC_N4_G99_2000.log", "SAC_N4"), ("releases/TORCS_SAC_N4_UF_G95_2000EP.log", "SAC_N4")], texts=plot_texts,smooth_factor=20)
 
     ##PLOT 2 Compare different algos against same feature (i.e. max_reward)
-    x_column="total_step"
+    #x_column="episode"
+    x_column = "total_step"
     y_column="total_score"
-    log_filenames=["releases/TORCS_SACLSTM_512256128_L1_EP3000_N1_G99.log"]
-    #log_filenames = ["logs\Torcs_per-ddpg_f18c5ea.txt"]
-    plot_algos_new(log_filenames, x_column=x_column, y_column=y_column)
+    log_filenames=["releases/TORCS_SAC_N4_G99_2000.log", "releases/TORCS_SACLSTM_512256128_L1_EP2000_N1_G99.log"]
+    #plot_multi_algo_single_feature(log_filenames, x_column=x_column, y_column=y_column, smooth_factor=1000)
+
+
+    ##PLOT 3 Compare algos against tracks
+    x_column = "total_step"
+    y_column="total_score"
+    #log_filenames=["releases/TORCS_SAC_N4_G99_2000.log", "releases/TORCS_SACLSTM_512256128_L1_EP2000_N1_G99.log"]
+    log_filenames = ["releases/TORCS_SAC_N4_G99_2000.log", "releases/TORCS_SACLSTM_512256128_L1_EP2000_N1_G99.log"]
+    tracks=["e-track-1","e-track-2"]
+    tracks_all=['e-track-2','g-track-1','alpine-1']
+    plot_algo_per_track(log_filenames, tracks=tracks_all, x_column=x_column, y_column=y_column, smooth_factor=50)
+
+
+    ##TABLE1 Compare algos against tracks
 
 
 
