@@ -12,7 +12,7 @@ BRAKE = 2
 
 
 class PeslaAgent(nn.Module):
-    def __init__(self, model_path: str, device: str = 'cpu'):
+    def __init__(self, model_path: str, device: str = 'cuda'):
         super().__init__()
         self._device = device
         self.hx, self.cx = None, None
@@ -33,9 +33,7 @@ class PeslaAgent(nn.Module):
             raise Exception('[ERROR] the input path does not exist. -> %s' % model_path)
 
     def reset_lstm(self):
-        self.hx, self.cx = self.model.init_lstm_states(1)
-        self.hx.to(self._device)
-        self.cx.to(self._device)
+        self.hx, self.cx = self.model.init_lstm_states(1, self._device)
 
     def action(self, state: torch.Tensor) -> np.ndarray:
         with torch.no_grad():
