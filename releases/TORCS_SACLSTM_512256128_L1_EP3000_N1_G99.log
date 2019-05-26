@@ -1,6 +1,5 @@
 Namespace(algo='sac-lstm', episode_num=10000, filter=False, interim_test_num=1, load_from=None, log=True, max_episode_steps=10000, num_stack=1, relaunch_period=5, render=False, reward_type='extra_github', save_period=50, seed=777, test=False, test_period=100, track='none')
 {'GAMMA': 0.99, 'TAU': 0.005, 'W_ENTROPY': 0.001, 'W_MEAN_REG': 0.0, 'W_STD_REG': 0.0, 'W_PRE_ACTIVATION_REG': 0.0, 'LR_ACTOR': 0.0003, 'LR_VF': 0.0003, 'LR_QF1': 0.0003, 'LR_QF2': 0.0003, 'LR_ENTROPY': 0.0003, 'POLICY_UPDATE_FREQ': 2, 'BATCH_SIZE': 32, 'EPISODE_SIZE': 1000, 'STEP_SIZE': 16, 'AUTO_ENTROPY_TUNING': True, 'WEIGHT_DECAY': 0.0, 'INITIAL_RANDOM_ACTION': 10000, 'MULTIPLE_LEARN': 1, 'BRAKE_REGION': 200000, 'BRAKE_DIST_MU': 100000, 'BRAKE_DIST_SIGMA': 30000, 'BRAKE_FACTOR': 0.1}
-32;252;8078;-8;236.150;0.000;0.198;0.200;235.752;0.000;forza;7;10.77;1.65
 33;252;8330;-7;10.804;0.465;0.025;0.025;10.555;-0.033;forza;7;12.12;1.90
 34;257;8587;-7;-0.148;-0.009;0.027;0.027;0.049;-0.247;forza;7;18.49;2.40
 35;255;8842;-7;-0.416;-0.003;0.026;0.026;0.029;-0.496;forza;7;18.96;2.12
