@@ -202,9 +202,9 @@ class TorcsEnv:
         elif self.reward_type == 'sigmoid_v2':
             Vx = obs['speedX'] / 200
             Vy = obs['speedY'] / 200
-            clipped_cos = sigmoid(np.cos(obs['angle']) * 2)
-            inverse_clipped_cos = (1 - clipped_cos) / 2
-            reward = Vx * clipped_cos - Vx * inverse_clipped_cos - Vy * clipped_cos
+            clipped_cos = sigmoid(np.cos(obs['angle']) * 3)
+            sintheta = np.abs(np.sin(obs['angle']))
+            reward = Vx * clipped_cos - Vx * sintheta - Vy * clipped_cos
         elif self.reward_type == 'sigmoid_v3':
             Vx = obs['speedX'] / 200
             Vy = obs['speedY'] / 200
