@@ -16,7 +16,7 @@ class DefaultEnv(TorcsEnv):
     def __init__(self,
                  port=3101,
                  nstack=1,
-                 reward_type='sigmoid',
+                 reward_type='extra_github',
                  track='none',
                  filter=None,
                  client_mode=False):
@@ -79,7 +79,7 @@ class ContinuousEnv(DefaultEnv):
     def __init__(self,
                  port=3101,
                  nstack=1,
-                 reward_type='sigmoid',
+                 reward_type='extra_github',
                  track='none',
                  filter=None,
                  client_mode=False):
@@ -109,7 +109,7 @@ class DiscretizedEnv(DefaultEnv):
     def __init__(self,
                  port=3101,
                  nstack=1,
-                 reward_type='sigmoid',
+                 reward_type='extra_github',
                  track='none',
                  filter=None,
                  action_count=21,
