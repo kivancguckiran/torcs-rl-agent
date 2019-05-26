@@ -61,9 +61,5 @@ class PeslaAgent(nn.Module):
         return action
 
     def forward(self, state) -> np.ndarray:
-        try:
-            state = torch.FloatTensor(state).to(self._device)
-            return self.action(state)
-        except Exception as emsg:
-            print(emsg)
-            return self.fallback()
+        state = torch.FloatTensor(state).to(self._device)
+        return self.action(state)
