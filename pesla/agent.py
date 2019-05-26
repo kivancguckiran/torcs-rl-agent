@@ -64,5 +64,6 @@ class PeslaAgent(nn.Module):
         try:
             state = torch.FloatTensor(state).to(self._device)
             return self.action(state)
-        except:
+        except Exception as emsg:
+            print(emsg)
             return self.fallback()
