@@ -45,10 +45,6 @@ def get_color(color_index):
         return "magenta"
 
 
-def plot_algo_features(files,x_column,y_columns):
-    #TODO
-    pass
-
 
 def plot_algos(files,x_column,y_column,smooth_factor=100):
 
@@ -72,6 +68,10 @@ def plot_algos(files,x_column,y_column,smooth_factor=100):
 
         # Moving average y_values
         y_values = smoother(y_values, smooth_factor)
+
+        # Cut exceeding episodes
+        y_values = y_values[:min_iteration]
+        x_values = x_values[:len(y_values)]  ##smoothing reduces the array length a bit
 
         #Get line color and advance to new color
         color = get_color(color_index)
@@ -137,7 +137,7 @@ def plot_multi_algo_single_feature(files, x_column, y_column, smooth_factor=100)
 def plot_algo_per_track(files, x_column, y_column,tracks, smooth_factor=100):
     color_index = 0
 
-    # find min_episode for plots
+    # find min_iteration for plots
     # load logs
     all_logs = []
     for logfilename_name in files:
@@ -145,7 +145,7 @@ def plot_algo_per_track(files, x_column, y_column,tracks, smooth_factor=100):
         all_logs.append(logs)
 
     # cut lenght to the min epiosode of logs
-    min_episode = np.min([len(logs) for logs in all_logs])
+    min_iteration = np.min([len(logs) for logs in all_logs])
 
 
     for track in tracks:
@@ -177,7 +177,7 @@ def plot_algo_per_track(files, x_column, y_column,tracks, smooth_factor=100):
             y_values = smoother(y_values, smooth_factor)
 
             #Cut exceeding episodes
-            y_values = y_values[:min_episode]
+            y_values = y_values[:min_iteration]
             x_values = x_values[:len(y_values)] ##smoothing reduces the array length a bit
 
             # Get line color and advance to new color
@@ -245,6 +245,17 @@ def persist_figure(title):
 
 def plot_same_algo_different_runs(logfilename_name_pairs, texts=[[""] * 3], smooth_factor=100):
 
+    # find min_iteration for plots
+    # load logs
+    all_logs = []
+    for logfilename_name,name in logfilename_name_pairs:
+        logs = read_log_file_to_df(logfilename_name)
+        all_logs.append(logs)
+
+    # cut lenght to the min epiosode of logs
+    min_iteration = np.min([len(logs) for logs in all_logs])
+
+
     for i, (title, xlabel, ylabel,y_axis_title) in enumerate(texts):
 
         #load logs
@@ -289,13 +300,13 @@ if __name__ == "__main__":
     plot_texts = [
         [
             "Max Speed",#x_column_legend
-            "episode", #x_column value
+            "total_step", #x_column value
             "max_speed", ## y_column value
             "speed" ##y_axis title
         ],
         [
             "Average Speed",#x_column_legend
-            "episode",#x_column value
+            "total_step",#x_column value
             "avg_speed",## y_column value
             "speed",##y_axis title
 
@@ -319,6 +330,7 @@ if __name__ == "__main__":
     tracks=["e-track-1","e-track-2"]
     tracks_all=['e-track-2','g-track-1','alpine-1']
     plot_algo_per_track(log_filenames, tracks=tracks_all, x_column=x_column, y_column=y_column, smooth_factor=50)
+
 
     ##TABLE1 Compare algos against tracks
 
