@@ -42,7 +42,7 @@ def main():
                                   port=args.port)
     elif args.algo == "sac-lstm":
         env = torcs.ContinuousEnv(nstack=1,
-                                  filter=filter,
+                                  filter=filter_kernel,
                                   client_mode=True,
                                   port=args.port)
     else:
@@ -52,8 +52,13 @@ def main():
     agent = module.init(env, args)
 
     state = env.reset()
-    for i in range(args.max_episode_steps):
-        action = agent.select_action(state)
+    if args.algo == "sac-lstm":
+        hx, cx = agent.actor.init_lstm_states(1)
+    while True:
+        if args.algo == "sac":
+            action = agent.select_action(state)
+        elif args.algo == "sac-lstm":
+            action, hx, cx = agent.select_action(state, hx, cx)
         state, _, done, _ = env.step(action)
         if done:
             break

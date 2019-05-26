@@ -227,12 +227,12 @@ if __name__ == "__main__":
 
         ]
     ]
-    plot_same_algo_different_runs([("releases/TORCS_SAC_N4_G99_2000.log", "SAC_N4"), ("releases/TORCS_SAC_N4_UF_G95_2000EP.log", "SAC_N4")], texts=plot_texts)
+    # plot_same_algo_different_runs([("releases/TORCS_SAC_N4_G99_2000.log", "SAC_N4"), ("releases/TORCS_SAC_N4_UF_G95_2000EP.log", "SAC_N4")], texts=plot_texts)
 
     ##PLOT 2 Compare different algos against same feature (i.e. max_reward)
-    x_column="episode"
+    x_column="total_step"
     y_column="total_score"
-    log_filenames=["releases/TORCS_SAC_N4_G99_2000.log", "releases/TORCS_SACLSTM_512256128_L1_EP2000_N1_G99.log"]
+    log_filenames=["releases/TORCS_SACLSTM_512256128_L1_EP3000_N1_G99.log"]
     #log_filenames = ["logs\Torcs_per-ddpg_f18c5ea.txt"]
     plot_algos_new(log_filenames, x_column=x_column, y_column=y_column)
 
