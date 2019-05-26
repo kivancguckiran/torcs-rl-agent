@@ -18,7 +18,8 @@ class DefaultEnv(TorcsEnv):
                  nstack=1,
                  reward_type='extra_github',
                  track='none',
-                 filter=None,
+                 state_filter=None,
+                 action_filter=None,
                  client_mode=False):
         super().__init__(port,
                          path='/usr/local/share/games/torcs/config/raceman/quickrace.xml',
@@ -27,11 +28,18 @@ class DefaultEnv(TorcsEnv):
                          track=track)
         self.nstack = nstack
         self.stack_buffer = deque(maxlen=nstack)
-        self.filter = filter
-        if filter is not None:
-            self.filter = np.tile(np.array(filter).reshape(-1, 1), self.observation_space.shape[0])
-            self.filter_size = self.filter.shape[0]
-            self.filter_buffer = deque(maxlen=self.filter_size)
+
+        self.state_filter = state_filter
+        if state_filter is not None:
+            self.state_filter = np.tile(np.array(state_filter).reshape(-1, 1), self.observation_space.shape[0])
+            self.state_filter_size = self.state_filter.shape[0]
+            self.state_filter_buffer = deque(maxlen=self.state_filter_size)
+
+        self.action_filter = action_filter
+        if action_filter is not None:
+            self.action_filter = np.tile(np.array(action_filter).reshape(-1, 1), self.action_space.shape[0])
+            self.action_filter_size = self.action_filter.shape[0]
+            self.action_filter_buffer = deque(maxlen=self.action_filter_size)
 
     @property
     def state_dim(self):
@@ -43,8 +51,15 @@ class DefaultEnv(TorcsEnv):
             return self.action_space.n
         return self.action_space.shape[0]
 
-    def preprocess_action(self, u):
-        return u
+    def preprocess_action(self, action):
+        if self.action_filter is not None:
+            self.action_filter_buffer.append(action)
+            while len(self.action_filter_buffer) < self.action_filter_size:
+                self.action_filter_buffer.append(action)
+            actions = np.array(self.action_filter_buffer)
+            action = np.sum(np.multiply(actions, self.action_filter), axis=0) / sum(self.action_filter)
+
+        return action
 
     def reset(self, relaunch=False, sampletrack=False, render=False):
         state = super().reset(relaunch, sampletrack, render)
@@ -58,12 +73,12 @@ class DefaultEnv(TorcsEnv):
 
         next_state, reward, done, info = super().step(u)
 
-        if self.filter is not None:
-            self.filter_buffer.append(next_state)
-            while len(self.filter_buffer) < self.filter_size:
-                self.filter_buffer.append(next_state)
-            prev_state = np.array(self.filter_buffer)
-            next_state = np.sum(np.multiply(prev_state, self.filter), axis=0) / sum(self.filter)
+        if self.state_filter is not None:
+            self.state_filter_buffer.append(next_state)
+            while len(self.state_filter_buffer) < self.state_filter_size:
+                self.state_filter_buffer.append(next_state)
+            states = np.array(self.state_filter_buffer)
+            next_state = np.sum(np.multiply(states, self.state_filter), axis=0) / sum(self.state_filter)
 
         if self.nstack > 1:
             self.stack_buffer.append(next_state)
@@ -81,24 +96,25 @@ class ContinuousEnv(DefaultEnv):
                  nstack=1,
                  reward_type='extra_github',
                  track='none',
-                 filter=None,
+                 state_filter=None,
+                 action_filter=None,
                  client_mode=False):
-        super().__init__(port, nstack, reward_type, track, filter, client_mode)
+        super().__init__(port, nstack, reward_type, track, state_filter, action_filter, client_mode)
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,))
 
     def preprocess_action(self, u):
-        env_u = np.zeros(3)
+        act = np.zeros(3)
 
-        env_u[STEER] = u[0]
+        act[STEER] = u[0]
 
         if u[1] > 0:
-            env_u[ACCEL] = u[1]
-            env_u[BRAKE] = -1
+            act[ACCEL] = u[1]
+            act[BRAKE] = -1
         else:
-            env_u[ACCEL] = 0
-            env_u[BRAKE] = (abs(u[1]) * 2) - 1
+            act[ACCEL] = 0
+            act[BRAKE] = (abs(u[1]) * 2) - 1
 
-        return env_u
+        return super().preprocess_action(act)
 
     def try_brake(self, u):
         u[1] = torch.rand(1) - 1
@@ -111,10 +127,11 @@ class DiscretizedEnv(DefaultEnv):
                  nstack=1,
                  reward_type='extra_github',
                  track='none',
-                 filter=None,
-                 action_count=21,
-                 client_mode=False):
-        super().__init__(port, nstack, reward_type, track, filter, client_mode)
+                 state_filter=None,
+                 action_filter=None,
+                 client_mode=False,
+                 action_count=21):
+        super().__init__(port, nstack, reward_type, track, state_filter, action_filter, client_mode)
 
         assert (action_count + 3) % 6 == 0
 
@@ -125,13 +142,13 @@ class DiscretizedEnv(DefaultEnv):
         self.steer_actions = np.repeat(np.linspace(-1, 1, action_count // 3), 3).flatten()
 
     def preprocess_action(self, u):
-        env_u = np.zeros(3)
+        act = np.zeros(3)
 
-        env_u[ACCEL] = self.accelerate_actions[u]
-        env_u[STEER] = self.steer_actions[u]
-        env_u[BRAKE] = self.brake_actions[u]
+        act[ACCEL] = self.accelerate_actions[u]
+        act[STEER] = self.steer_actions[u]
+        act[BRAKE] = self.brake_actions[u]
 
-        return env_u
+        return super().preprocess_action(act)
 
     def try_brake(self, u):
         brake_actions = np.linspace(2, self.action_dim - 1, self.action_dim // 3)
