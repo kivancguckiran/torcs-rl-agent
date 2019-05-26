@@ -8,41 +8,19 @@
 from typing import Callable, Tuple
 
 import torch
-from torch.distributions import Categorical, Normal
 import torch.nn as nn
 import torch.nn.functional as F
-
-from algorithms.common.helper_functions import identity, make_one_hot
-
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+from torch.distributions import Normal
 
 
-def concat(
-    in_1: torch.Tensor, in_2: torch.Tensor, n_category: int = -1
-) -> torch.Tensor:
-    """Concatenate state and action tensors properly depending on the action."""
-    in_2 = make_one_hot(in_2, n_category) if n_category > 0 else in_2
-
-    if len(in_2.size()) == 1:
-        in_2 = in_2.unsqueeze(0)
-
-    in_concat = torch.cat((in_1, in_2), dim=-1)
-
-    return in_concat
+def identity(x: torch.Tensor) -> torch.Tensor:
+    """Return input without any change."""
+    return x
 
 
-def init_layer_uniform(layer: nn.Linear, init_w: float = 3e-3) -> nn.Linear:
-    """Init uniform parameters on the single layer"""
-    layer.weight.data.uniform_(-init_w, init_w)
-    layer.bias.data.uniform_(-init_w, init_w)
-
-    return layer
-
-
-def init_layer_xavier(layer: nn.Linear, init_w: float = 3e-3) -> nn.Linear:
+def init_layer_xavier(layer: nn.Linear) -> nn.Linear:
     nn.init.xavier_uniform_(layer.weight)
     nn.init.zeros_(layer.bias)
-
     return layer
 
 
@@ -121,9 +99,9 @@ class MLP(nn.Module):
             self.output_layer = identity
             self.output_activation = identity
 
-    def init_lstm_states(self, batch_size, dev=device):
-        hx = torch.zeros(self.lstm_layer_size, batch_size, self.lstm_size).float().to(dev)
-        cx = torch.zeros(self.lstm_layer_size, batch_size, self.lstm_size).float().to(dev)
+    def init_lstm_states(self, batch_size):
+        hx = torch.zeros(self.lstm_layer_size, batch_size, self.lstm_size).float()
+        cx = torch.zeros(self.lstm_layer_size, batch_size, self.lstm_size).float()
 
         return hx, cx
 
@@ -140,17 +118,6 @@ class MLP(nn.Module):
         x = self.output_activation(self.output_layer(x))
 
         return x, hx, cx
-
-
-class FlattenMLP(MLP):
-    """Baseline of Multilayered perceptron for Flatten input."""
-
-    def forward(self, states, actions, batch_size, step_size, hx, cx) -> torch.Tensor:
-        """Forward method implementation."""
-        states = states.view(batch_size, step_size, -1)
-        actions = actions.view(batch_size, step_size, -1)
-        flat_inputs = concat(states, actions, self.n_category)
-        return super(FlattenMLP, self).forward(flat_inputs, batch_size, step_size, hx, cx)
 
 
 class GaussianDist(MLP):

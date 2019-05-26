@@ -16,6 +16,8 @@ parser.add_argument(
 parser.add_argument(
     "--test", dest="test", action="store_true", help="test mode (no training)")
 parser.add_argument(
+    "--track", type=str, default="none", help="track name")
+parser.add_argument(
     "--use-state-filter", dest="state_filter", action="store_true", help="apply filter to observations")
 parser.add_argument(
     "--use-action-filter", dest="action_filter", action="store_true", help="apply filter to actions")
