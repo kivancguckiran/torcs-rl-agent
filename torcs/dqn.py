@@ -16,7 +16,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 hyper_params = {
     "N_STEP": 3,
-    "GAMMA": 0.975,
+    "GAMMA": 0.977,
     "TAU": 5e-3,
     "W_N_STEP": 1.0,
     "W_Q_REG": 1e-7,
