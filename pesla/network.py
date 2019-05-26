@@ -99,9 +99,9 @@ class MLP(nn.Module):
             self.output_layer = identity
             self.output_activation = identity
 
-    def init_lstm_states(self, batch_size):
-        hx = torch.zeros(self.lstm_layer_size, batch_size, self.lstm_size).float()
-        cx = torch.zeros(self.lstm_layer_size, batch_size, self.lstm_size).float()
+    def init_lstm_states(self, batch_size, device):
+        hx = torch.zeros(self.lstm_layer_size, batch_size, self.lstm_size).float().to(device)
+        cx = torch.zeros(self.lstm_layer_size, batch_size, self.lstm_size).float().to(device)
 
         return hx, cx
 
