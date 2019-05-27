@@ -27,7 +27,8 @@ def main():
     env = TorcsEnv(port=args.port,
                    path="/usr/local/share/games/torcs/config/raceman/quickrace.xml",
                    client_mode=args.client_mode,
-                   track=args.track)
+                   track=args.track,
+                   enable_termination=False)
 
     # The agent must be recreated or reset_lstm() function must be called for every episode start
     agent = PeslaAgent(model_path=args.load_from, device=args.device)
