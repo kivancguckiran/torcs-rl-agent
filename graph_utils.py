@@ -10,7 +10,7 @@ a2c_columns={"episode":0,"score":1,"total_loss":2,"policy_loss":3,"value_loss":4
 per_ddpg_columns={"episode":0,"episode_step":1,"total_step":2,"total_score":3,"total_loss":4,"actor_loss":5,"critic_loss":6}
 dqn_columns = {"episode":0,"episode_step":1,"total_step":2,"total_score":3,"unused":4,"total_loss":5,"avg_q_value":6,"track_name":7,"race position":8,"max_speed":9,"avg_speed":10}
 #dqn_columns = {"episode":0,"episode_step":1,"total_step":2,"total_score":3,"epsilon":4,"loss":5,"avg_q_value":6} ##This is not working with Torcs_dqn_5400
-sac_columns={"episode":0,"episode_step":1,"total_step":2,"total_score":3,"total_loss":4,"actor_loss":5,"qf_1_loss":6,"qf_2_loss":7,"vf_loss":8,"alpha_loss":9,"track_name":10,"race_position":11,"max_speed":12,"avg_speed":13}
+sac_columns={"episode":0,"episode_step":1,"total_step":2,"total_score":3,"total_loss":4,"actor_loss":5,"qf_1_loss":6,"qf_2_loss":7,"vf_loss":8,"alpha_loss":9,"track_name":10,"race_position":11,"max_speed":12,"avg_speed":13,"max_rolling_total_score":14}
 t3d_columns ={"episode":0,"episode_step":1,"total_step":2,"total_score":3,"total_loss":4,"actor:loss":5,"critic1_loss":6,"critic2_loss":7,"track_name":8,"race_position":9,"max_speed":10,"avg_speed":11}
 
 algo_column_list={
@@ -312,6 +312,21 @@ if __name__ == "__main__":
     plot_same_algo_different_runs([("releases/TORCS_SACLSTM_512256128_L1_EP3000_N1_G99_trimmed.log", "SACLSTM")],texts=plot_texts, smooth_factor=100)
     #plot_same_algo_different_runs([("releases/Torcs_dqn_a11ccc2.log", "DQN") ],texts=plot_texts, smooth_factor=200)
 
+    ##PLOT 3.5 - Max Cumulative Rewards
+    ## with multiple features ( i.e. Max Speed , Average speed)
+    plot_texts = [
+        [
+            "episode_step",#x_column_legend
+            "total_step", #x_column value
+            "max_rolling_total_score", ## y_column value
+            "Max_Rolling_Reward" ##y_axis title
+        ]
+    ]
+
+    plot_same_algo_different_runs([("releases/TORCS_SACLSTM_512256128_L1_EP3000_N1_G99_trimmed.log", "SACLSTM")],texts=plot_texts, smooth_factor=100)
+    #plot_same_algo_different_runs([("releases/Torcs_dqn_a11ccc2.log", "DQN") ],texts=plot_texts, smooth_factor=200)
+
+
 
 
     ##PLOT 4 Compare different algos against same feature (i.e. max_reward)
@@ -341,7 +356,7 @@ if __name__ == "__main__":
 
 
 
-    ##TABLE1 Compare algos against tracks
+
 
 
 
