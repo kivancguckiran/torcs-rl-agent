@@ -47,13 +47,14 @@ class TorcsEnv:
 
     initial_reset = True
 
-    def __init__(self, port=3101, path=None, reward_type='original', track='none', client_mode=False):
+    def __init__(self, port=3101, path=None, reward_type='original', track='none', client_mode=False, enable_termination=True):
         self.port = port
         self.client_mode = client_mode
         self.initial_run = True
         self.reward_type = reward_type
         self.reset_counter = 0
         self.reset_torcs()
+        self.enable_termination = enable_termination
         
         if path:
             self.tree = ET.parse(path)
@@ -229,7 +230,7 @@ class TorcsEnv:
             reward = -1
 
         if self.terminal_judge_start < self.time_step: # Episode terminates if the progress of agent is small
-            if abs(progress) < self.termination_limit_progress:
+            if self.enable_termination and abs(progress) < self.termination_limit_progress:
                     reward -= 10
                     # print("--- No progress restart : reward: {},x:{},angle:{},trackPos:{}".format(reward,sp,obs['angle'],obs['trackPos']))
                     # print(self.time_step)
@@ -247,7 +248,7 @@ class TorcsEnv:
                 # client.R.d['meta'] = True
 
             self.backward_counter += 1
-            if self.backward_counter >= 250:
+            if self.enable_termination and self.backward_counter >= 250:
                 episode_terminate = True
         else:
             self.backward_counter = 0

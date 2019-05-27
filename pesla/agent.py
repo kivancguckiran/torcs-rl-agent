@@ -12,7 +12,7 @@ BRAKE = 2
 
 
 class PeslaAgent(nn.Module):
-    def __init__(self, model_path: str, device: str = 'cpu'):
+    def __init__(self, model_path: str, device: str = 'cuda'):
         super().__init__()
         self._device = device
         self.hx, self.cx = None, None
@@ -33,11 +33,10 @@ class PeslaAgent(nn.Module):
             raise Exception('[ERROR] the input path does not exist. -> %s' % model_path)
 
     def reset_lstm(self):
-        self.hx, self.cx = self.model.init_lstm_states(1)
-        self.hx.to(self._device)
-        self.cx.to(self._device)
+        self.hx, self.cx = self.model.init_lstm_states(1, self._device)
 
-    def action(self, state: torch.Tensor) -> np.ndarray:
+    def forward(self, state) -> np.ndarray:
+        state = torch.FloatTensor(state).to(self._device)
         with torch.no_grad():
             _, _, _, u, _, self.hx, self.cx = self.model(state, 1, 1, self.hx, self.cx)
         u = u.squeeze_(0).squeeze_(0).detach().cpu().numpy()
@@ -52,17 +51,3 @@ class PeslaAgent(nn.Module):
             action[BRAKE] = (abs(u[1]) * 2) - 1
 
         return action
-
-    def fallback(self):
-        action = np.zeros(3)
-        action[STEER] = 0
-        action[ACCEL] = 0.5
-        action[BRAKE] = -1
-        return action
-
-    def forward(self, state) -> np.ndarray:
-        try:
-            state = torch.FloatTensor(state).to(self._device)
-            return self.action(state)
-        except:
-            return self.fallback()
