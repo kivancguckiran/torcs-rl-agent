@@ -23,7 +23,7 @@ hyper_params = {
     "LR_VF": 1e-4,
     "LR_QF1": 1e-4,
     "LR_QF2": 1e-4,
-    "LR_ENTROPY": 3e-4,
+    "LR_ENTROPY": 1e-4,
     "POLICY_UPDATE_FREQ": 2,
     "BATCH_SIZE": 32,
     "EPISODE_SIZE": int(1e3),
