@@ -232,7 +232,7 @@ class EpisodeBuffer:
                 actions.append(action)
                 rewards.append(reward)
                 next_states.append(next_state)
-                dones.append(done)
+                dones.append(1. if done else 0.)
 
         states_ = torch.FloatTensor(np.array(states)).to(device)
         actions_ = torch.FloatTensor(np.array(actions)).to(device)
