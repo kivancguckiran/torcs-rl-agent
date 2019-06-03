@@ -4,7 +4,7 @@ This project is for the BLG604E Deep Reinforcement Learning term project at ITU,
 
 ## TORCS
 
-Competition took place within TORCS environment and the winner agent was our Pesla agent.
+Competition took place within TORCS environment and the winner agent was our Pesla agent. There is an upcoming conference paper regarding architecture.
 
 ## Usage
 
