@@ -10,7 +10,7 @@ Competition took place within TORCS environment and the winner agent was our Pes
 
 Winner agent:
 ```
-python test_torcs.py --on-render --test --algo sac-lstm --load-from releases/TORCS_SACLSTM_512256128_L1_EP5000_N1_G99.pt
+python test_torcs.py --test --algo sac-lstm --load-from releases/TORCS_SACLSTM_512256128_L1_EP5000_N1_G99.pt
 ```
 
 Training: (please see command line arguments)
